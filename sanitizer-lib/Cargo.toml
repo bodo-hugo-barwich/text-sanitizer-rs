@@ -1,0 +1,17 @@
+[package]
+name = "sanitizer_lib"
+version = "0.1.0"
+authors = ["usr15"]
+edition = "2018"
+
+[lib]
+name = "sanitizer_lib"
+path = "src/sanitizer.rs"
+
+[build]
+rustflags = [ "-C", "target-cpu=native" ]
+
+[profile.release]
+codegen-units = 1
+lto = true
+
