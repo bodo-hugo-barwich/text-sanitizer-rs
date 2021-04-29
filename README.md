@@ -5,6 +5,14 @@ This Crate holds a Library and an Executable.\
 The Executable which can be invoked from command line taking the requested Data from the STDIN 
 and producing the sanitized output to STDOUT
 
+## Features
+* Very low Dependencies
+  This leads to:
+  * High Compability (compiles even with old _Rust_ Compilers)
+  * Very fast Startup Time (Execution Time about 3 - 5 ms)
+* Robust Code (does not use risky `unwrap()` Methods)
+  Developed with the _DevOps_ Mentalitity: "_can fail but will live to tell_"
+
 ## Motivation
 When dealing with System Outputs they are usually formated in the configured local language that include special characters.\
 Those characters are by nature not equivalent to their ASCII representation `'Acción' != 'Accion'` which makes reliable parsing difficult.\
