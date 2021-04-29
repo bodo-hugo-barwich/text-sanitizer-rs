@@ -57,7 +57,7 @@ like in this `Ansible` Task List:
 This task list will produce this output:\
 Now the Header Line can much easier transformed,parsed and matched.
 ```plain
-TASK [base-internet : Sanitize yum History] ********************************************************
+TASK [yum-history : Sanitize yum History] ********************************************************
 task path: /path/to/playbook/roles/yum-history/tasks/check_history.yml:52
 ok: [host02] => {
     "changed": false, 
