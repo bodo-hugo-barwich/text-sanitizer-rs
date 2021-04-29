@@ -9,13 +9,13 @@ and producing the sanitized output to STDOUT
 * Very low Dependencies\
   This leads to:
   * High Compability (compiles even with old _Rust_ Compilers)
-  * Very fast Startup Time (Execution Time about 3 - 5 ms)
+  * Very fast Startup Time (Execution Time about **3 - 5 ms**)
 * Robust Code (does not use risky `unwrap()` Methods)\
   Developed with the _DevOps_ Mentalitity: "_can fail but will live to tell_"
 
 ## Motivation
 When dealing with System Outputs they are usually formated in the configured local language that include special characters.\
-Those characters are by nature not equivalent to their ASCII representation `'Acción' != 'Accion'` which makes reliable parsing difficult.\
+Those characters are by nature not equivalent to their ASCII representation `'Acción' != 'Accion'` which makes reliable parsing difficult.
 
 ## Use Case
 In many Automations the System Output must be parsed and converted to Data Structures to process further.\
