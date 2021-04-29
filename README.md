@@ -6,7 +6,7 @@ The **Executable** which can be invoked from **command line** taking the request
 and producing the sanitized output to STDOUT
 
 ## Features
-* Very low Dependencies
+* Very low Dependencies\
   This leads to:
   * High Compability (compiles even with old _Rust_ Compilers)
   * Very fast Startup Time (Execution Time about 3 - 5 ms)
