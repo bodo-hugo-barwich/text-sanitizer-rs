@@ -10,7 +10,7 @@ and producing the sanitized output to STDOUT
   This leads to:
   * High Compability (compiles even with old _Rust_ Compilers)
   * Very fast Startup Time (Execution Time about 3 - 5 ms)
-* Robust Code (does not use risky `unwrap()` Methods)
+* Robust Code (does not use risky `unwrap()` Methods)\
   Developed with the _DevOps_ Mentalitity: "_can fail but will live to tell_"
 
 ## Motivation
