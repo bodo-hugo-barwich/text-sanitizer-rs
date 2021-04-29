@@ -1,8 +1,8 @@
 # Text-Sanitizer
 Rust Library to convert rich UTF-8 Text into plain ASCII Text
 
-This Crate holds a Library and an Executable.\
-The Executable which can be invoked from command line taking the requested Data from the STDIN 
+This Crate holds a **Library** and an Executable.\
+The **Executable** which can be invoked from **command line** taking the requested Data from the STDIN 
 and producing the sanitized output to STDOUT
 
 ## Features
