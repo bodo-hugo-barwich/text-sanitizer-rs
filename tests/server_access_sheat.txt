@@ -1,0 +1,32 @@
+Access Sheat <server_name> - ISO-8859-15 Windows
+=========================
+
+Nombre:		<server_canonical_name>
+IP internet:	<server_public_ip>
+IP intranet:	<server_intern_ip>
+
+
+Sistema:
+-------------------------
+
+usuario:	root
+contraseña:	<root_password>
+
+
+MySQL:
+-------------------------
+
+usuario:	root
+contraseña:	<mysql_password>
+
+
+FTP Upload / Backups:
+-------------------------
+
+usuario:	<ftp_user01>
+contraseña:	<ftp_password01>
+
+usuario:	<ftp_user02>
+contraseña:	<ftp_password02>
+
+
