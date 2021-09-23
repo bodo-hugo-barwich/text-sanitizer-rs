@@ -80,7 +80,7 @@ pub fn build_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
 
     if(bdebug && ! bquiet) {
       println!(
-          "sequence 0 (cnt: '{}', strt: '{}', end: '{}'): '{:x?}' - parsing ...",
+          "; sequence 0 (cnt: '{}', strt: '{}', end: '{}'): '{:x?}' - parsing ...",
           sequence.len(),
           icstrt,
           icend,
@@ -91,7 +91,7 @@ pub fn build_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
     while bprsgo && icstrt < icend {
       if(bdebug && ! bquiet) {
         println!(
-            "sequence (cnt: '{}', strt: '{}', end: '{}'): '{:x?}' - parsing ...",
+            "; sequence (cnt: '{}', strt: '{}', end: '{}'): '{:x?}' - parsing ...",
             sequence[icstrt..icend].len(),
             icstrt,
             icend,
@@ -275,18 +275,42 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
     let mut icstrt: Option<usize> = None;
     let mut icend: Option<usize> = None;
 
-    for uc in text.chunks(1) {
-        if (uc[0] >= 32 as u8
-            && uc[0] < 127 as u8)
-          || uc[0] == 10 {
+
+    if(bdbg && ! bqt) {
+      println!("vtext 0:'{:?}'", text);
+    }
+
+
+    for uc in text {
+
+        //if(bdbg && ! bqt) {
+          print!("; {} - {}:'{}', {:?}|", ic, uc, char::from(*uc), icstrt);
+        //}
+
+/*
+        if (*uc >= 32 as u8
+            && *uc < 127 as u8)
+          || *uc == 10 as u8 {
+		    //------------------------
+		    //Valid ASCII Character
+
+
+	        if(bdbg && ! bqt) {
+	    		print!("\npdg spec chars '{:?} - {:?}'", icstrt, icend);
+	        }
+
             if icstrt.is_some() {
+			    //------------------------
+			    //Pending Non ASCII Characters
+
                 icend = Some(ic);
 
                 if(bdbg && ! bqt) {
-                  print!("\nspec char '{} - {}': '{:?}", icstrt.unwrap(), icend.unwrap()
+                  print!("\npdg spec chars '{} - {}': '{:?}'", icstrt.unwrap(), icend.unwrap()
                     , &text[icstrt.unwrap()..icend.unwrap()]);
                 }
 
+				//Parse the slice of Non ASCII Characters
                 let vuni = parse_unicode(&text[icstrt.unwrap()..icend.unwrap()], bdbg, bqt);
 
                 if (bdbg && !bqt) {
@@ -331,21 +355,79 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
                 icstrt = None;
             }   //if icstrt.is_some()
 
+	        if(bdbg && ! bqt) {
+	    		print!("\nadd char '{}'", uc);
+	        }
 
-            srstxt.push(char::from(uc[0]));
+			//Add the valid ASCII Character
+            srstxt.push(char::from(*uc));
 
         } else if icstrt.is_none() {
+		    //------------------------
+		    //Non ASCII Character
+
             icstrt = Some(ic);
+	        if(bdbg && ! bqt) {
+	    		print!("\nnw spec char '{:?} - {:?}'", icstrt, icend);
+	        }
         } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
           //  || uc[0] == 10 || uc[0] == 13
-
-        if(bdbg && ! bqt) {
-          print!("{}:'{}'|", uc[0], char::from(uc[0]));
-        }
+*/
 
         ic += 1;
-    } //for (ic, uc) in text.chunks(1).enumerate() {
+    } //for uc in text
 
+	if icstrt.is_some() {
+    	icend = Some(ic);
+
+        if(bdbg && ! bqt) {
+    		print!("\nspec char '{} - {}': '{:?}", icstrt.unwrap(), icend.unwrap()
+            	, &text[icstrt.unwrap()..icend.unwrap()]);
+        }
+
+        let vuni = parse_unicode(&text[icstrt.unwrap()..icend.unwrap()], bdbg, bqt);
+
+        if (bdbg && !bqt) {
+            print!(" | {:?}", vuni);
+        }
+
+        for suni in vuni {
+            orpl = None;
+
+            for slng in vrqlanguages {
+              if orpl.is_none() {
+                olngrplmap = rplmap.get(slng.as_str());
+
+                if let Some(lngmap) = olngrplmap {
+                  orpl = lngmap.get(suni.as_str());
+                }
+              }  //if orpl.is_none()
+            } //for slng in vrqlanguages
+
+            match orpl {
+              Some(rpl) => {
+                srstxt.push_str(rpl);
+
+                if (bdbg && !bqt) {
+                    print!(" -> '{}'", rpl);
+                }
+              }
+              None => {
+                srstxt.push_str(&format!("(?{})", &suni));
+
+                if (bdbg && !bqt) {
+                    print!(" -> '(?{})'", &suni);
+                }
+              }  //Some(rpl)
+            } //match orpl
+        } //for suni in vuni
+
+        if (bdbg && !bqt) {
+            print!("'");
+        } //if(bdbg && ! bqt)
+
+        icstrt = None;
+    }   //if icstrt.is_some()
 
     if(bdbg && ! bqt) {
       println!("sanitze done.");
