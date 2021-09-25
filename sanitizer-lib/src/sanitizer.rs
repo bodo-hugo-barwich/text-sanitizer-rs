@@ -269,6 +269,8 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
   rplmap.insert("es", lngrplmap);
 
 
+  let mut srpt = String::new();
+
     let mut srstxt = String::with_capacity(text.len());
     let mut orpl = None;
     let mut ic: usize = 0;
@@ -283,28 +285,39 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
 
     for uc in text {
 
-        //if(bdbg && ! bqt) {
-          print!("; {} - {}:'{}', {:?}|", ic, uc, char::from(*uc), icstrt);
-        //}
+		srpt.push_str(&format!("; {} - {}:'{}'", ic, uc, char::from(*uc)));
+
 
 /*
+        //if(bdbg && ! bqt) {
+          print!("; {} - {}:'{}', {:?}, '{:?}"
+			, ic, uc, char::from(*uc)
+			, (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
+			, icstrt);
+        //}
+*/
+
         if (*uc >= 32 as u8
             && *uc < 127 as u8)
-          || *uc == 10 as u8 {
+          || ( *uc == 10 as u8 ) {
 		    //------------------------
 		    //Valid ASCII Character
 
+			srpt.push_str(", ascii");
 
-	        if(bdbg && ! bqt) {
+/*
+	        //if(bdbg && ! bqt) {
 	    		print!("\npdg spec chars '{:?} - {:?}'", icstrt, icend);
-	        }
+	        //}
+
+
 
             if icstrt.is_some() {
 			    //------------------------
 			    //Pending Non ASCII Characters
 
                 icend = Some(ic);
-
+/*
                 if(bdbg && ! bqt) {
                   print!("\npdg spec chars '{} - {}': '{:?}'", icstrt.unwrap(), icend.unwrap()
                     , &text[icstrt.unwrap()..icend.unwrap()]);
@@ -353,29 +366,44 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
                 } //if(bdbg && ! bqt)
 
                 icstrt = None;
-            }   //if icstrt.is_some()
+ */
+			}   //if icstrt.is_some()
 
-	        if(bdbg && ! bqt) {
+	        //if(bdbg && ! bqt) {
 	    		print!("\nadd char '{}'", uc);
-	        }
-
+	        //}
+*/
 			//Add the valid ASCII Character
             srstxt.push(char::from(*uc));
 
-        } else if icstrt.is_none() {
+        } else {
+
+			srpt.push_str(", non-ascii");
+
+		} 	//if (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
+
+/*
+
+else if icstrt.is_none() {
 		    //------------------------
 		    //Non ASCII Character
 
             icstrt = Some(ic);
-	        if(bdbg && ! bqt) {
-	    		print!("\nnw spec char '{:?} - {:?}'", icstrt, icend);
-	        }
+	        //if(bdbg && ! bqt) {
+	    		print!(" > {:?} - {:?}'|", icstrt, icend);
+	        //}
+		} else {
+			print!(" - {:?}'|", icend);
         } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
           //  || uc[0] == 10 || uc[0] == 13
 */
 
         ic += 1;
     } //for uc in text
+
+	srpt.push_str(&format!("; chr cnt '{}'", ic));
+
+	println!("rpt: '{}'", &srpt);
 
 	if icstrt.is_some() {
     	icend = Some(ic);
@@ -430,7 +458,7 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
     }   //if icstrt.is_some()
 
     if(bdbg && ! bqt) {
-      println!("sanitze done.");
+      println!("; sanitze done.");
     }
 
     if(bdbg && ! bqt) {
