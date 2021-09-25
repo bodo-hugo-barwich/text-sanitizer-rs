@@ -301,11 +301,12 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
 
         if (*uc >= 32 as u8
             && *uc < 127 as u8)
-          || ( *uc == 10 as u8 ) {
+          || ( *uc == 10 as u8 )
+		  || ( *uc == 9 as u8 ) {
 		    //------------------------
 		    //Valid ASCII Character
 
-			srptchrs.push_str(" - ascii");
+			//srptchrs.push_str(" - ascii");
 
             if icstrt.is_some() {
 			    //------------------------
