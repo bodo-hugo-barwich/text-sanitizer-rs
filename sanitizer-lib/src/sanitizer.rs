@@ -150,14 +150,26 @@ pub fn build_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
 
                     for iu in (ivldps)..(ivldps + invalid_sequence_length) {
                         if(bdebug && ! bquiet){
-                          println!("ivld chrs: '{:x?}'", &sequence[iu]);
+                          println!("ivld chr: '{:x?}'", &sequence[iu]);
                         }
 
                         build_result.push(format!("(?{:x?})", &sequence[iu]));
                     } //for iu in (ivldps)..(ivldps + invalid_sequence_length)
 
                     icstrt = ivldps + invalid_sequence_length;
-                } else {
+                } else {	//All Bytes are invalid
+                    if(bdebug && ! bquiet) {
+                      println!("ivld chrs cnt: all");
+                    }
+
+                    for iu in (ivldps)..(icend) {
+                        if(bdebug && ! bquiet){
+                          println!("ivld chr: '{:x?}'", &sequence[iu]);
+                        }
+
+                        build_result.push(format!("(?{:x?})", &sequence[iu]));
+                    } //for iu in (ivldps)..(ivldps + invalid_sequence_length)
+
                     bprsgo = false;
                 } //if let Some(invalid_sequence_length) = e.error_len()
             }
@@ -269,9 +281,8 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
   rplmap.insert("es", lngrplmap);
 
 
-  let mut srpt = String::new();
-
     let mut srstxt = String::with_capacity(text.len());
+	let mut srptchrs = String::new();
     let mut orpl = None;
     let mut ic: usize = 0;
     let mut icstrt: Option<usize> = None;
@@ -282,20 +293,11 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
       println!("vtext 0:'{:?}'", text);
     }
 
-
     for uc in text {
 
-		srpt.push_str(&format!("; {} - {}:'{}'", ic, uc, char::from(*uc)));
-
-
-/*
-        //if(bdbg && ! bqt) {
-          print!("; {} - {}:'{}', {:?}, '{:?}"
-			, ic, uc, char::from(*uc)
-			, (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
-			, icstrt);
-        //}
-*/
+        if(bdbg && ! bqt) {
+          srptchrs.push_str(&format!("; {} - {}:'{}'", ic, uc, char::from(*uc)));
+       }
 
         if (*uc >= 32 as u8
             && *uc < 127 as u8)
@@ -303,31 +305,25 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
 		    //------------------------
 		    //Valid ASCII Character
 
-			srpt.push_str(", ascii");
-
-/*
-	        //if(bdbg && ! bqt) {
-	    		print!("\npdg spec chars '{:?} - {:?}'", icstrt, icend);
-	        //}
-
-
+			srptchrs.push_str(" - ascii");
 
             if icstrt.is_some() {
 			    //------------------------
 			    //Pending Non ASCII Characters
 
                 icend = Some(ic);
-/*
+
                 if(bdbg && ! bqt) {
-                  print!("\npdg spec chars '{} - {}': '{:?}'", icstrt.unwrap(), icend.unwrap()
+                  println!("pdg spec chars '{} - {}': '{:?}'", icstrt.unwrap(), icend.unwrap()
                     , &text[icstrt.unwrap()..icend.unwrap()]);
                 }
+
 
 				//Parse the slice of Non ASCII Characters
                 let vuni = parse_unicode(&text[icstrt.unwrap()..icend.unwrap()], bdbg, bqt);
 
                 if (bdbg && !bqt) {
-                    print!(" | {:?}", vuni);
+                    print!("= {:?}", vuni);
                 }
 
                 for suni in vuni {
@@ -362,54 +358,42 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
                 } //for suni in vuni
 
                 if (bdbg && !bqt) {
-                    print!("'");
+                    println!("'");
                 } //if(bdbg && ! bqt)
+/**/
 
                 icstrt = None;
- */
-			}   //if icstrt.is_some()
+ 			}   //if icstrt.is_some()
 
-	        //if(bdbg && ! bqt) {
-	    		print!("\nadd char '{}'", uc);
-	        //}
-*/
 			//Add the valid ASCII Character
             srstxt.push(char::from(*uc));
 
-        } else {
-
-			srpt.push_str(", non-ascii");
-
-		} 	//if (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
-
-/*
-
-else if icstrt.is_none() {
+		} else  {
 		    //------------------------
 		    //Non ASCII Character
 
+			srptchrs.push_str(&format!(" - non-ascii '{:?}", icstrt));
+
+			if icstrt.is_none() {
+
             icstrt = Some(ic);
 	        //if(bdbg && ! bqt) {
-	    		print!(" > {:?} - {:?}'|", icstrt, icend);
+	    		srptchrs.push_str(&format!(" > {:?} - {:?}'|", icstrt, icend));
 	        //}
-		} else {
-			print!(" - {:?}'|", icend);
-        } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
-          //  || uc[0] == 10 || uc[0] == 13
-*/
+			} else {
+				srptchrs.push_str(&format!(" - {:?}'|", icend));
+	        } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
+		} 	//if (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
+
 
         ic += 1;
     } //for uc in text
-
-	srpt.push_str(&format!("; chr cnt '{}'", ic));
-
-	println!("rpt: '{}'", &srpt);
 
 	if icstrt.is_some() {
     	icend = Some(ic);
 
         if(bdbg && ! bqt) {
-    		print!("\nspec char '{} - {}': '{:?}", icstrt.unwrap(), icend.unwrap()
+    		print!("\nrst spec char '{} - {}': '{:?}", icstrt.unwrap(), icend.unwrap()
             	, &text[icstrt.unwrap()..icend.unwrap()]);
         }
 
@@ -457,12 +441,17 @@ else if icstrt.is_none() {
         icstrt = None;
     }   //if icstrt.is_some()
 
-    if(bdbg && ! bqt) {
-      println!("; sanitze done.");
-    }
 
     if(bdbg && ! bqt) {
+		srptchrs.push_str(&format!("; chr cnt '{}'", ic));
+
+
+      println!("; sanitze done.");
+		println!("chrs rpt: '{:?}'", &srptchrs);
+
+
       let vsttrpt: Vec<char> = String::from_utf8_lossy(text).to_mut().chars().collect();
+
 
       println!("stt rpt chrs (count : '{}'):\n{:?}", vsttrpt.len(), vsttrpt);
 

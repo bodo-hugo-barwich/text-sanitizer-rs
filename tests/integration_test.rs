@@ -1,3 +1,12 @@
+/*
+Recreating the Test Data:
+
+	$ perl -e 'my @arrchrs = (240, 159, 151, 119, 150, 139); print pack "U*", @arrchrs;' | target/debug/text-sanitizer -i -d
+
+*/
+
+
+
 extern crate sanitizer_lib;
 
 use sanitizer_lib::sanitizer;
@@ -50,6 +59,6 @@ fn sparkle_heart_broken() {
 
     println!("sparkle_heart: '{}'", srsout);
 
-    assert_eq!(srsout, "💖");
+    assert_eq!(srsout, "(?f0)(?9f)w(?96)");
 
 }
