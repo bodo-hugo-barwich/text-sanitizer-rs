@@ -80,7 +80,7 @@ pub fn build_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
 
     if(bdebug && ! bquiet) {
       println!(
-          "sequence 0 (cnt: '{}', strt: '{}', end: '{}'): '{:x?}' - parsing ...",
+          "; sequence 0 (cnt: '{}', strt: '{}', end: '{}'): '{:x?}' - parsing ...",
           sequence.len(),
           icstrt,
           icend,
@@ -91,7 +91,7 @@ pub fn build_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
     while bprsgo && icstrt < icend {
       if(bdebug && ! bquiet) {
         println!(
-            "sequence (cnt: '{}', strt: '{}', end: '{}'): '{:x?}' - parsing ...",
+            "; sequence (cnt: '{}', strt: '{}', end: '{}'): '{:x?}' - parsing ...",
             sequence[icstrt..icend].len(),
             icstrt,
             icend,
@@ -150,14 +150,26 @@ pub fn build_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
 
                     for iu in (ivldps)..(ivldps + invalid_sequence_length) {
                         if(bdebug && ! bquiet){
-                          println!("ivld chrs: '{:x?}'", &sequence[iu]);
+                          println!("ivld chr: '{:x?}'", &sequence[iu]);
                         }
 
                         build_result.push(format!("(?{:x?})", &sequence[iu]));
                     } //for iu in (ivldps)..(ivldps + invalid_sequence_length)
 
                     icstrt = ivldps + invalid_sequence_length;
-                } else {
+                } else {	//All Bytes are invalid
+                    if(bdebug && ! bquiet) {
+                      println!("ivld chrs cnt: all");
+                    }
+
+                    for iu in (ivldps)..(icend) {
+                        if(bdebug && ! bquiet){
+                          println!("ivld chr: '{:x?}'", &sequence[iu]);
+                        }
+
+                        build_result.push(format!("(?{:x?})", &sequence[iu]));
+                    } //for iu in (ivldps)..(ivldps + invalid_sequence_length)
+
                     bprsgo = false;
                 } //if let Some(invalid_sequence_length) = e.error_len()
             }
@@ -270,27 +282,49 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
 
 
     let mut srstxt = String::with_capacity(text.len());
+	let mut srptchrs = String::new();
     let mut orpl = None;
     let mut ic: usize = 0;
     let mut icstrt: Option<usize> = None;
     let mut icend: Option<usize> = None;
 
-    for uc in text.chunks(1) {
-        if (uc[0] >= 32 as u8
-            && uc[0] < 127 as u8)
-          || uc[0] == 10 {
+
+    if(bdbg && ! bqt) {
+      println!("vtext 0:'{:?}'", text);
+    }
+
+    for uc in text {
+
+        if(bdbg && ! bqt) {
+          srptchrs.push_str(&format!("; {} - {}:'{}'", ic, uc, char::from(*uc)));
+       }
+
+        if (*uc >= 32 as u8
+            && *uc < 127 as u8)
+          || ( *uc == 10 as u8 )
+		  || ( *uc == 9 as u8 ) {
+		    //------------------------
+		    //Valid ASCII Character
+
+			//srptchrs.push_str(" - ascii");
+
             if icstrt.is_some() {
+			    //------------------------
+			    //Pending Non ASCII Characters
+
                 icend = Some(ic);
 
                 if(bdbg && ! bqt) {
-                  print!("\nspec char '{} - {}': '{:?}", icstrt.unwrap(), icend.unwrap()
+                  println!("pdg spec chars '{} - {}': '{:?}'", icstrt.unwrap(), icend.unwrap()
                     , &text[icstrt.unwrap()..icend.unwrap()]);
                 }
 
+
+				//Parse the slice of Non ASCII Characters
                 let vuni = parse_unicode(&text[icstrt.unwrap()..icend.unwrap()], bdbg, bqt);
 
                 if (bdbg && !bqt) {
-                    print!(" | {:?}", vuni);
+                    print!("= {:?}", vuni);
                 }
 
                 for suni in vuni {
@@ -325,34 +359,100 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
                 } //for suni in vuni
 
                 if (bdbg && !bqt) {
-                    print!("'");
+                    println!("'");
                 } //if(bdbg && ! bqt)
+/**/
 
                 icstrt = None;
-            }   //if icstrt.is_some()
+ 			}   //if icstrt.is_some()
 
+			//Add the valid ASCII Character
+            srstxt.push(char::from(*uc));
 
-            srstxt.push(char::from(uc[0]));
+		} else  {
+		    //------------------------
+		    //Non ASCII Character
 
-        } else if icstrt.is_none() {
+			srptchrs.push_str(&format!(" - non-ascii '{:?}", icstrt));
+
+			if icstrt.is_none() {
+
             icstrt = Some(ic);
-        } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
-          //  || uc[0] == 10 || uc[0] == 13
+	        //if(bdbg && ! bqt) {
+	    		srptchrs.push_str(&format!(" > {:?} - {:?}'|", icstrt, icend));
+	        //}
+			} else {
+				srptchrs.push_str(&format!(" - {:?}'|", icend));
+	        } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
+		} 	//if (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
 
-        if(bdbg && ! bqt) {
-          print!("{}:'{}'|", uc[0], char::from(uc[0]));
-        }
 
         ic += 1;
-    } //for (ic, uc) in text.chunks(1).enumerate() {
+    } //for uc in text
+
+	if icstrt.is_some() {
+    	icend = Some(ic);
+
+        if(bdbg && ! bqt) {
+    		print!("\nrst spec char '{} - {}': '{:?}", icstrt.unwrap(), icend.unwrap()
+            	, &text[icstrt.unwrap()..icend.unwrap()]);
+        }
+
+        let vuni = parse_unicode(&text[icstrt.unwrap()..icend.unwrap()], bdbg, bqt);
+
+        if (bdbg && !bqt) {
+            print!(" | {:?}", vuni);
+        }
+
+        for suni in vuni {
+            orpl = None;
+
+            for slng in vrqlanguages {
+              if orpl.is_none() {
+                olngrplmap = rplmap.get(slng.as_str());
+
+                if let Some(lngmap) = olngrplmap {
+                  orpl = lngmap.get(suni.as_str());
+                }
+              }  //if orpl.is_none()
+            } //for slng in vrqlanguages
+
+            match orpl {
+              Some(rpl) => {
+                srstxt.push_str(rpl);
+
+                if (bdbg && !bqt) {
+                    print!(" -> '{}'", rpl);
+                }
+              }
+              None => {
+                srstxt.push_str(&format!("(?{})", &suni));
+
+                if (bdbg && !bqt) {
+                    print!(" -> '(?{})'", &suni);
+                }
+              }  //Some(rpl)
+            } //match orpl
+        } //for suni in vuni
+
+        if (bdbg && !bqt) {
+            print!("'");
+        } //if(bdbg && ! bqt)
+
+        icstrt = None;
+    }   //if icstrt.is_some()
 
 
     if(bdbg && ! bqt) {
-      println!("sanitze done.");
-    }
+		srptchrs.push_str(&format!("; chr cnt '{}'", ic));
 
-    if(bdbg && ! bqt) {
+
+      println!("; sanitze done.");
+		println!("chrs rpt: '{:?}'", &srptchrs);
+
+
       let vsttrpt: Vec<char> = String::from_utf8_lossy(text).to_mut().chars().collect();
+
 
       println!("stt rpt chrs (count : '{}'):\n{:?}", vsttrpt.len(), vsttrpt);
 

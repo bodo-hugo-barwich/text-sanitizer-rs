@@ -1,6 +1,8 @@
 #Exclude Project Files
 .project
 Cargo.lock
+textsanitizer_rs
+textsanitizer_rs/*
 
 #Exclude Build Files
 target
