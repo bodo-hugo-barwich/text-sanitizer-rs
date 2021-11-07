@@ -1,17 +1,25 @@
 
 
+
 #[cfg(test)]
 mod file_tests {
 	//use std::process::exit;
+  use std::io::{Error, ErrorKind};
 	use std::path::{Path, PathBuf};
-	use std::io::{Error, ErrorKind};
-	use std::ffi::OsStr;
+  use std::fs::read;
+	use std::ffi::{OsStr, OsString};
+
+
+  extern crate sanitizer_lib;
+
+  use sanitizer_lib::sanitizer;
+
 
 
   // The derive implements <RuntimeOptions> == <RuntimeOptions> comparisons
   #[derive(PartialEq)]
   enum RuntimeOptions {
-     Quiet
+    Quiet
     , Debug
   }
 
@@ -45,17 +53,6 @@ mod file_tests {
 		}
 	}
 
-
-	fn list_testdata(datadir: &Path, _options: &[RuntimeOptions]) -> Result<i32, Error> {
-		for entry in datadir.read_dir().expect("read_dir call failed") {
-		    if let Ok(entry) = entry {
-		        println!("{:?}", entry.path());
-		    }
-		}
-
-
-		Ok(4)
-	}
 
 	fn find_maindir(options: &[RuntimeOptions]) -> Result<PathBuf, Error> {
     let omdpth = match std::env::current_exe() {
@@ -156,11 +153,148 @@ mod file_tests {
 	}
 
 
+  fn list_testdata(datadir: &Path, lstfiles: &mut Vec<PathBuf>, options: &[RuntimeOptions]) -> Result<usize, Error> {
+    for entry in datadir.read_dir().expect("read_dir call failed") {
+      if let Ok(entry) = entry {
+        if options.contains(&RuntimeOptions::Debug)
+          && ! options.contains(&RuntimeOptions::Quiet) {
+          println!("dta fl: '{:?}'", &entry.path());
+        }
+
+        lstfiles.push(entry.path());
+      } //if let Ok(entry) = entry
+    } //for entry in datadir.read_dir().expect("read_dir call failed")
+
+
+    Ok(lstfiles.len())
+  }
+
+
+  fn read_file(sourcefile: &Path) -> Result<Vec<u8>, Error> {
+    let vcntnt = read(sourcefile)?;
+
+
+    Ok(vcntnt)
+  }
+
+
+  fn parse_basename(filename: &Path) -> OsString {
+    let mut bsnmrs = match filename.file_stem() {
+      Some(base) => OsString::from(base)
+      , None => OsString::from("")
+    };
+
+
+    if let Some(base) = Path::new(&bsnmrs).file_stem() {
+      bsnmrs = OsString::from(base);
+    }
+
+
+    bsnmrs
+  }
+
+  fn parse_extension(filename: &Path) -> OsString {
+    let extlstrs = match filename.extension() {
+      Some(ext) => OsString::from(ext)
+      , None => OsString::from("")
+    };
+    let flnmnoext = filename.with_extension("");
+    let mut extrs = match flnmnoext.extension() {
+      Some(ext) => OsString::from(ext)
+      , None => OsString::from("")
+    };
+
+
+    if ! extlstrs.is_empty() {
+      extrs.push(".");
+      extrs.push(&extlstrs);
+    }
+
+    extrs
+  }
+
+fn test_file(datafile: &Path, options: &[RuntimeOptions]) -> Result<(), Error> {
+    let vtstdta = read_file(datafile)?;
+    let flbsnm = parse_basename(datafile).into_string().unwrap();
+    let mut rsflnm = OsString::from(&flbsnm);
+    let flext = parse_extension(datafile);
+
+
+    if options.contains(&RuntimeOptions::Debug)
+      && ! options.contains(&RuntimeOptions::Quiet) {
+      println!("fl bs nm: '{:?}'\nfl ext: '{:?}'", flbsnm, flext);
+    }
+
+    if ! flbsnm.ends_with("_result") {
+
+      rsflnm.push("_result");
+      rsflnm.push(&flext);
+
+
+      let resultfile = datafile.with_file_name(&rsflnm);
+
+
+      if options.contains(&RuntimeOptions::Debug)
+        && ! options.contains(&RuntimeOptions::Quiet) {
+        println!("fl rs nm: '{:?}'", resultfile);
+        println!("fl tst '{}{}' -> fl rs '{:?}'", &flbsnm
+          , String::from(flext.to_str().unwrap()), resultfile.file_name());
+      }
+
+
+      let vrsdta = read_file(&resultfile)?;
+      let srsdta = String::from_utf8_lossy(&vrsdta).into_owned();
+
+
+      let mut vrqlngs: Vec<String> = Vec::new();
+
+      let mut sopt = String::new();
+
+
+      sopt.push_str(" -d");
+
+      vrqlngs.push(String::from("en"));
+      vrqlngs.push(String::from("es"));
+      vrqlngs.push(String::from("de"));
+
+
+      let srsout = sanitizer::sanitize_u8(&vtstdta, &vrqlngs, &sopt);
+
+
+      if options.contains(&RuntimeOptions::Debug)
+        && ! options.contains(&RuntimeOptions::Quiet) {
+        println!("fl '{}{}' san dmp:\n'{}'", &flbsnm
+          , String::from(flext.to_str().unwrap()), srsout);
+      }
+
+      assert_eq!(srsout, srsdta);
+
+    } //if ! flbsnm.ends_with("_result")
+
+    Ok(())
+  }
+
+
   #[test]
-  fn it_works() {
+  fn list_files() {
+    let mut lstdatafiles: Vec<PathBuf> = Vec::new();
+
     let maindir = find_maindir(&[RuntimeOptions::Debug]).expect("maindir not found");
+    let mut datadir = maindir.clone();
 
 
-    assert_eq!(4, list_testdata(&maindir, &[RuntimeOptions::Debug]).unwrap());
+    datadir.push("tests/data");
+
+    println!("mn dir: '{:?}'\ndta dir: '{:?}'", maindir, datadir);
+
+
+    assert!(list_testdata(&datadir, &mut lstdatafiles, &[RuntimeOptions::Debug]).is_ok());
+
+
+    println!("lst fls: '{:?}'", lstdatafiles);
+
+    for file in lstdatafiles {
+      assert!(test_file(&file, &[RuntimeOptions::Debug]).is_ok());
+    }
   }
 }
