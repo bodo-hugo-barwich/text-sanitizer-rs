@@ -54,16 +54,16 @@ fn main() {
            ├─23523 /usr/sbin/upsmon -F
            └─23527 /usr/sbin/upsmon -F
 
-jul 03 20:55:45 wks18-seo upsmon[23523]: UPS: salicru@localhost (master) (power value 1)
-jul 03 20:55:45 wks18-seo upsmon[23523]: Using power down flag file /etc/ups/killpower
-jul 03 20:55:45 wks18-seo upsmon[23523]: UPS [salicru@localhost]: connect failed: Connection failure: Connection refused
-jul 03 20:55:45 wks18-seo upsmon[23523]: Communications with UPS salicru@localhost lost
-jul 03 20:55:46 wks18-seo upsmon[23523]: Network UPS Tools upsmon 2.7.2
-jul 03 20:55:50 wks18-seo upsmon[23523]: UPS [salicru@localhost]: connect failed: Connection failure: Connection refused
-jul 03 20:55:50 wks18-seo upsmon[23523]: UPS salicru@localhost is unavailable
-jul 03 20:55:50 wks18-seo upsmon[23523]: Network UPS Tools upsmon 2.7.2
-jul 03 20:55:55 wks18-seo upsmon[23523]: Communications with UPS salicru@localhost established
-jul 03 20:55:55 wks18-seo upsmon[23523]: Network UPS Tools upsmon 2.7.2
+jul 03 20:55:45 <host_name> upsmon[23523]: UPS: salicru@localhost (master) (power value 1)
+jul 03 20:55:45 <host_name> upsmon[23523]: Using power down flag file /etc/ups/killpower
+jul 03 20:55:45 <host_name> upsmon[23523]: UPS [salicru@localhost]: connect failed: Connection failure: Connection refused
+jul 03 20:55:45 <host_name> upsmon[23523]: Communications with UPS salicru@localhost lost
+jul 03 20:55:46 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
+jul 03 20:55:50 <host_name> upsmon[23523]: UPS [salicru@localhost]: connect failed: Connection failure: Connection refused
+jul 03 20:55:50 <host_name> upsmon[23523]: UPS salicru@localhost is unavailable
+jul 03 20:55:50 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
+jul 03 20:55:55 <host_name> upsmon[23523]: Communications with UPS salicru@localhost established
+jul 03 20:55:55 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
 
 
 
@@ -76,16 +76,16 @@ jul 03 20:55:55 wks18-seo upsmon[23523]: Network UPS Tools upsmon 2.7.2
            ├─23523 /usr/sbin/upsmon -F
            └─23527 /usr/sbin/upsmon -F
 
-jul 03 20:55:45 wks18-seo upsmon[23523]: UPS: salicru@localhost (master) (power value 1)
-jul 03 20:55:45 wks18-seo upsmon[23523]: Using power down flag file /etc/ups/killpower
-jul 03 20:55:45 wks18-seo upsmon[23523]: UPS [salicru@localhost]: connect failed: Connection failure: Connection refused
-jul 03 20:55:45 wks18-seo upsmon[23523]: Communications with UPS salicru@localhost lost
-jul 03 20:55:46 wks18-seo upsmon[23523]: Network UPS Tools upsmon 2.7.2
-jul 03 20:55:50 wks18-seo upsmon[23523]: UPS [salicru@localhost]: connect failed: Connection failure: Connection refused
-jul 03 20:55:50 wks18-seo upsmon[23523]: UPS salicru@localhost is unavailable
-jul 03 20:55:50 wks18-seo upsmon[23523]: Network UPS Tools upsmon 2.7.2
-jul 03 20:55:55 wks18-seo upsmon[23523]: Communications with UPS salicru@localhost established
-jul 03 20:55:55 wks18-seo upsmon[23523]: Network UPS Tools upsmon 2.7.2
+jul 03 20:55:45 <host_name> upsmon[23523]: UPS: salicru@localhost (master) (power value 1)
+jul 03 20:55:45 <host_name> upsmon[23523]: Using power down flag file /etc/ups/killpower
+jul 03 20:55:45 <host_name> upsmon[23523]: UPS [salicru@localhost]: connect failed: Connection failure: Connection refused
+jul 03 20:55:45 <host_name> upsmon[23523]: Communications with UPS salicru@localhost lost
+jul 03 20:55:46 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
+jul 03 20:55:50 <host_name> upsmon[23523]: UPS [salicru@localhost]: connect failed: Connection failure: Connection refused
+jul 03 20:55:50 <host_name> upsmon[23523]: UPS salicru@localhost is unavailable
+jul 03 20:55:50 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
+jul 03 20:55:55 <host_name> upsmon[23523]: Communications with UPS salicru@localhost established
+jul 03 20:55:55 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
 </pre>
 
 ● nut-monitor.service - Network UPS Tools - power device monitor and shutdown controller
