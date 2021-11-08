@@ -21,7 +21,7 @@ and producing the sanitized output to STDOUT
 ## Motivation
 When dealing with System Outputs they are usually formated in the configured local language that include special characters.\
 Those characters are by nature not equivalent to their ASCII representation `'Acción' != 'Accion'` which makes reliable parsing difficult.\
-Those differences are often resolved with unmaintainable `sed` **command chains** \
+Those differences are often resolved with unmaintainable `sed` **command chains**
 
 ```plain
 $ cat -A nut-monitor_status.txt| sed -re 's#\$$##' -e 's#M-bM-\^##g' -e 's#M-CM-\)#e#g' -e 's#TM-\^[T\\]#|-#g' -e 's#TM-\^@#-#g' -e 's#WM-\^O#*#g'
