@@ -2,7 +2,7 @@
 
 
 # Text-Sanitizer
-Rust Library to convert rich UTF-8 Text into plain ASCII Text
+Rust Application and Library to convert rich UTF-8 Text into plain ASCII Text
 
 This Crate holds a **Library** and an Executable.\
 The **Executable** which can be invoked from **command line** taking the requested Data from the STDIN
@@ -20,7 +20,14 @@ and producing the sanitized output to STDOUT
 
 ## Motivation
 When dealing with System Outputs they are usually formated in the configured local language that include special characters.\
-Those characters are by nature not equivalent to their ASCII representation `'Acción' != 'Accion'` which makes reliable parsing difficult.
+Those characters are by nature not equivalent to their ASCII representation `'Acción' != 'Accion'` which makes reliable parsing difficult.\
+Those differences are often resolved with unmaintainable `sed` **command chains** \
+
+```plain
+$ cat -A nut-monitor_status.txt| sed -re 's#\$$##' -e 's#M-bM-\^##g' -e 's#M-CM-\)#e#g' -e 's#TM-\^[T\\]#|-#g' -e 's#TM-\^@#-#g' -e 's#WM-\^O#*#g'
+```
+
+which makes it easy to understand why those **handcrafted workarounds** are not desirable.
 
 
 ## Use Cases
@@ -32,7 +39,7 @@ Those characters are by nature not equivalent to their ASCII representation `'Ac
 $ cat lanzarote-com_de-ausfluge.html|grep -ioE "<p>[^/]*Sichern Sie sich Ihren Platz[^/]*</p>"|wc -l
 0
 ```
-It requires always some kind of sanitizing:
+It requires always some kind of **sanitizing**:
 
 ```plain
 $ cat -A lanzarote-com_de-ausfluge.html|grep -ioE "<p>[^/]*Sichern Sie sich Ihren Platz[^/]*</p>"|wc -l
@@ -40,9 +47,8 @@ $ cat -A lanzarote-com_de-ausfluge.html|grep -ioE "<p>[^/]*Sichern Sie sich Ihre
 $ cat -A lanzarote-com_de-ausfluge.html|grep -ioE "<p>[^/]*Sichern Sie sich Ihren Platz[^/]*</p>"
 <p>Sichern Sie sich Ihren Platz bei einem dieser AusflM-|ge und buchen Sie online mit dem Formular, d.as Sie auf der Informationsseite jedes Ausfluges finden. Sie kM-vnnen Ihre bevorzugten AusflM-|ge auch auf Ihrer persM-vnlichen ReisefM-|hrer-Seite einfM-|gen, um sie stets zur Hand zu haben.</p>
 ```
-but that way it has lost readability.
-So the sanitizing needs to be assisted with a **Reconstruction of the text**. Mostly with `sed` **regular expression workarounds**
-which often result unmaintainable because of its complex structure
+but that way it has lost readability. \
+So the sanitizing needs to be assisted with a **Reconstruction of the text**. Mostly with `sed` **regular expression workarounds** which often result unmaintainable because of its complex structure
 
 ```plain
 $ cat -A lanzarote-com_de-ausfluge.html|grep -ioE "<p>[^/]*Sichern Sie sich Ihren Platz[^/]*</p>"|sed -re 's#M\-v#oe#g' -e 's#M\-\|#ue#g'|wc -l
@@ -50,7 +56,7 @@ $ cat -A lanzarote-com_de-ausfluge.html|grep -ioE "<p>[^/]*Sichern Sie sich Ihre
 $ cat -A lanzarote-com_de-ausfluge.html|grep -ioE "<p>[^/]*Sichern Sie sich Ihren Platz[^/]*</p>"|sed -re 's#M\-v#oe#g' -e 's#M\-\|#ue#g'
 <p>Sichern Sie sich Ihren Platz bei einem dieser Ausfluege und buchen Sie online mit dem Formular, d.as Sie auf der Informationsseite jedes Ausfluges finden. Sie koennen Ihre bevorzugten Ausfluege auch auf Ihrer persoenlichen Reisefuehrer-Seite einfuegen, um sie stets zur Hand zu haben.</p>
 ```
-and also are measurable much slower:
+and also are measurable much slower: \
 The `cat -A | sed` command chain is **twice as slow as**  the _Text-Sanitizer_
 
 ```plain
@@ -158,7 +164,7 @@ ok: [host02] => {
 ```
 
 or unmaintainable constructs as seen in the **test file** `nut-monitor_status.txt` \
-which would be sanitized with the `cat -A | sed` command chaining in that manner:
+which would be sanitized with the `cat -A | sed` **command chaining** in that manner:
 
 ```plain
 $ cat -A nut-monitor_status.txt| sed -re 's#\$$##' -e 's#M-bM-\^##g' -e 's#M-CM-\)#e#g' -e 's#TM-\^[T\\]#|-#g' -e 's#TM-\^@#-#g' -e 's#WM-\^O#*#g'
@@ -186,5 +192,3 @@ jul 03 20:55:50 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
 jul 03 20:55:55 <host_name> upsmon[23523]: Communications with UPS salicru@localhost established
 jul 03 20:55:55 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
 ```
-
-which makes it easy to understand why those handcrafted workarounds are not desirable.
