@@ -157,7 +157,7 @@ ok: [host02] => {
 }
 ```
 
-or unmaintainable constructs as seen in the test file `nut-monitor_status.txt`
+or unmaintainable constructs as seen in the **test file** `nut-monitor_status.txt` \
 which would be sanitized with the `cat -A | sed` command chaining in that manner:
 
 ```plain
@@ -187,4 +187,4 @@ jul 03 20:55:55 <host_name> upsmon[23523]: Communications with UPS salicru@local
 jul 03 20:55:55 <host_name> upsmon[23523]: Network UPS Tools upsmon 2.7.2
 ```
 
-which makes it ease to understand why those handcrafted workarounds are not desirable.
+which makes it easy to understand why those handcrafted workarounds are not desirable.
