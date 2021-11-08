@@ -1,0 +1,10 @@
+<3!
+<3
+* identificador de la funcion invalido pero ejecucion exitosa|(?f0)
+
+Eine grosse Ueberschrift fuer eine Logmeldung.
+Alguna anotacion s\n sentido {, pero ejecutable}.
+Ejecucion fallida con [3]!
+Y alguna |tabla| => mostrando algo
+
+Conexion activada con exito (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/3)

@@ -1,0 +1,7 @@
+ID     | Linea de comandos        | Dia y hora       | Accion(es)     | Modific
+-------------------------------------------------------------------------------
+     5 |                          | 2021-04-07 14:57 | Install        |    6
+     4 | -y --best upgrade        | 2020-09-23 06:03 | I, U           |   59 EE
+     3 | -C -y remove firewalld - | 2020-06-11 02:40 | Removed        |   12 EE
+     2 | -C -y remove linux-firmw | 2020-06-11 02:40 | Removed        |    1
+     1 |                          | 2020-06-11 02:35 | Install        |  441 EE

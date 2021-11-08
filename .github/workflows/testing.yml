@@ -21,3 +21,6 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+      
+    - name: Profile Sanitizing 27KB Document
+      run: time cat tests/data/lanzarote-com_de-ausfluge.html | target/debug/text-sanitizer -i en es de > lz_prof_result.html
