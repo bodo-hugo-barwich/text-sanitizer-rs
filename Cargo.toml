@@ -1,25 +1,8 @@
-[package]
-name = "text-sanitizer"
-version = "1.0.0"
-authors = ["Bodo Hugo Barwich <b.barwich@hotmail.com>"]
-edition = "2018"
-
-[lib]
-name = "sanitizer_app"
-path = "src/lib.rs"
-
-[[bin]]
-name = "text-sanitizer"
-path = "src/main.rs"
-
-[dependencies]
-sanitizer_lib = { path = "sanitizer-lib" }
-
-[[example]]
-name = "nut-monitor"
-
-[build]
-rustflags = [ "-C", "target-cpu=native" ]
+[workspace]
+members = [
+    "text-sanitizer",
+    "text-sanitizer_app",
+]
 
 [profile.release]
 codegen-units = 1

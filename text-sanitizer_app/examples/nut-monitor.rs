@@ -1,8 +1,22 @@
 #![allow(unused)]
+/*
+* @author Bodo (Hugo) Barwich
+* @version 2022-11-04
+* @package text-sanitizer_app
+* @subpackage examples/nut-monitor.rs
 
-extern crate sanitizer_lib;
+* This module shows the usage on a real-world use case
+* It parses the output of a system command
+*
+*---------------------------------
+* Requirements:
+* - The Rust crate "text-sanitizer" must be installed
+*/
 
-use sanitizer_lib::sanitizer;
+
+extern crate text_sanitizer;
+
+use text_sanitizer::sanitizer;
 
 use std::process::Command;
 

@@ -1,3 +1,19 @@
+/*
+* @author Bodo (Hugo) Barwich
+* @version 2022-11-04
+* @package text-sanitizer
+* @subpackage tests/file_tests.rs
+
+* This module runs tests on the Text-Sanitizer library
+* It processes test files and checks the results against result files
+*
+*---------------------------------
+* Requirements:
+* - The Rust crate "text-sanitizer" must be installed
+*/
+
+
+
 #[cfg(test)]
 mod file_tests {
     //use std::process::exit;
@@ -6,9 +22,9 @@ mod file_tests {
     use std::io::{Error, ErrorKind};
     use std::path::{Path, PathBuf};
 
-    extern crate sanitizer_lib;
+    extern crate text_sanitizer;
 
-    use sanitizer_lib::sanitizer;
+    use text_sanitizer::sanitizer;
 
     // The derive implements <RuntimeOptions> == <RuntimeOptions> comparisons
     #[derive(PartialEq)]

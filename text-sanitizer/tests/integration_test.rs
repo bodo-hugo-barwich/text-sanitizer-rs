@@ -5,9 +5,9 @@ Recreating the Test Data:
 
 */
 
-extern crate sanitizer_lib;
+extern crate text_sanitizer;
 
-use sanitizer_lib::sanitizer;
+use text_sanitizer::sanitizer;
 
 #[test]
 fn sparkle_heart() {

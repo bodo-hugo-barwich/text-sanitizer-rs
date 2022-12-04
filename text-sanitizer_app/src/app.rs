@@ -1,20 +1,20 @@
 #![allow(unused)]
 /*
 * @author Bodo (Hugo) Barwich
-* @version 2022-11-03
-* @package sanitizer_app
+* @version 2022-11-04
+* @package text-sanitizer_app
 * @subpackage app.rs
 
 * This module is the application to run the Text-Sanitizer library
 *
 *---------------------------------
 * Requirements:
-* - The Rust module "sanitizer_lib" must be installed
+* - The Rust crate "text-sanitizer" must be installed
 */
 
-extern crate sanitizer_lib;
+extern crate text_sanitizer;
 
-use sanitizer_lib::sanitizer;
+use text_sanitizer::sanitizer;
 
 use std::io::{self, Read};
 

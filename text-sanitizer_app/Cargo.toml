@@ -1,0 +1,19 @@
+[package]
+name = "text-sanitizer_app"
+version = "1.0.0"
+authors = ["Bodo Hugo Barwich <b.barwich@hotmail.com>"]
+edition = "2018"
+
+[lib]
+name = "sanitizer_app"
+path = "src/lib.rs"
+
+[[bin]]
+name = "text-sanitizer"
+path = "src/main.rs"
+
+[[example]]
+name = "nut-monitor"
+
+[dependencies]
+text-sanitizer = { path = "../text-sanitizer" }

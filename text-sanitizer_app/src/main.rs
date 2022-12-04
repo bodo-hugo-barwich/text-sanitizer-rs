@@ -1,7 +1,7 @@
 /*
 * @author Bodo (Hugo) Barwich
-* @version 2022-11-03
-* @package text-sanitizer
+* @version 2022-11-04
+* @package text-sanitizer_app
 * @subpackage main.rs
 
 * This module provides the interface for the Text-Sanitizer application executeable

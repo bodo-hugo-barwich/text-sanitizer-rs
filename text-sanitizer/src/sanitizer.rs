@@ -1,8 +1,17 @@
 #![allow(unused)]
+/*
+* @author Bodo (Hugo) Barwich
+* @version 2022-11-03
+* @package text-sanitizer
+* @subpackage sanitizer.rs
+
+* This module implements the Text-Sanitizer logic
+*
+*---------------------------------
+* Requirements:
+*/
 
 
-
-pub mod sanitizer {
 
 use std::str;
 use std::collections::HashMap;
@@ -478,6 +487,4 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
 
 pub fn sanitize_string(text: String, vrqlanguages: &Vec<String>, options: &str) -> String {
   sanitize_u8(text.as_bytes(), vrqlanguages, options)
-}
-
 }

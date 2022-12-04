@@ -1,7 +1,7 @@
 /*
 * @author Bodo (Hugo) Barwich
-* @version 2022-11-03
-* @package sanitizer_app
+* @version 2022-11-04
+* @package text-sanitizer_app
 * @subpackage lib.rs
 
 * This module implements the execution section for the Text-Sanitizer application
