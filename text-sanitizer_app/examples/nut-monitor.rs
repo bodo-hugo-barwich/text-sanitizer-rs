@@ -13,7 +13,6 @@
 * - The Rust crate "text-sanitizer" must be installed
 */
 
-
 extern crate text_sanitizer;
 
 use text_sanitizer::sanitizer;

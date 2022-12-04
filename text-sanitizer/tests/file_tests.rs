@@ -12,8 +12,6 @@
 * - The Rust crate "text-sanitizer" must be installed
 */
 
-
-
 #[cfg(test)]
 mod file_tests {
     //use std::process::exit;
