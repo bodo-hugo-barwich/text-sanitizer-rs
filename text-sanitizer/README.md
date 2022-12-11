@@ -27,6 +27,7 @@ The `sanitizer::sanitize_u8()` function takes the raw data and creates a new val
 fn sparkle_heart() {
     //-------------------------------------
     // Test data is the Sparkle Heart from the UTF-8 documentation examples
+    // which will be converted to " <3 ".
 
     let vsparkle_heart = vec![240, 159, 146, 150];
     let vrqlngs: Vec<String> = vec![String::from("en")];
@@ -45,7 +46,7 @@ use text_sanitizer::sanitizer;
 
 fn two_hearts_center() {
     //-------------------------------------
-    // Test data contains 2 Sparkle Hears but is corrupted in the center
+    // Test data contains 2 Sparkle Hearts but is corrupted in the center
 
     let vsparkle_heart = vec![240, 159, 146, 150, 119, 250, 240, 159, 146, 150];
     let vrqlngs: Vec<String> = vec![String::from("en")];
