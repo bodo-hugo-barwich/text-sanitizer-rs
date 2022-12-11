@@ -1,12 +1,12 @@
 [package]
 name = "text-sanitizer"
-version = "1.4.3"
+version = "1.4.4"
 authors = ["Bodo Hugo Barwich <b.barwich@hotmail.com>"]
 edition = "2018"
 description = "convert text to plain ASCII text"
 readme = "README.md"
 homepage = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
-documentation = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
+documentation = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs/tree/master/text-sanitizer"
 repository = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
 license = "Apache-2.0"
 keywords = ["text-processing", "utf-8", "unicode", "ascii", "sanitizing" ]

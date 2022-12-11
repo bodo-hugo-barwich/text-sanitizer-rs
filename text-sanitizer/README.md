@@ -14,13 +14,13 @@ _Rust_ Crate to convert raw text bytes into valid `std::str::String` with plain 
 
 
 ## Motivation
-Most _Rust_ parsing libraries will bail out when fed with raw data that is not UTF-8 encoded like `ISO-8859-15 Windows` encoding 
+Most _Rust_ parsing libraries will bail out when fed with raw data that is not UTF-8 encoded like `ISO-8859-15 Windows` encoding
 and others or mixed-up encodings. \
-Using `Str::from_utf8_lossy()` will break those data and includes linear back and forth parsing on byte level 
+Using `Str::from_utf8_lossy()` will break those data and includes linear back and forth parsing on byte level
 which introduces performance penality on bigger data.\
 `text-sanitizer` does not depend on proper encoding detection and relies only on an internal customizable convertion map.
 
-#Usage
+## Usage
 The `sanitizer::sanitize_u8()` function takes the raw data and creates a new valid UTF-8 `std::str::String` from it.
 ```rust
 
