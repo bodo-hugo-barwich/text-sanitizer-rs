@@ -491,18 +491,13 @@ Recreating the Test Data:
 #[test]
 fn sparkle_heart() {
     //-------------------------------------
-    //Read the Application Parameters
+    // Test data is the Sparkle Heart from the UTF-8 documentation examples
 
-    let mut vrqlngs: Vec<String> = Vec::new();
-
-    let mut sopt = String::new();
     let vsparkle_heart = vec![240, 159, 146, 150];
 
-    sopt.push_str(" -d");
+    let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    vrqlngs.push(String::from("en"));
-
-    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &sopt);
+    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
 
     println!("sparkle_heart: '{}'", srsout);
 
@@ -512,18 +507,13 @@ fn sparkle_heart() {
 #[test]
 fn sparkle_heart_broken() {
     //-------------------------------------
-    //Read the Application Parameters
+    //Test data is the Sparkle Heart from the UTF-8 documentation examples but it is broken
 
-    let mut vrqlngs: Vec<String> = Vec::new();
-
-    let mut sopt = String::new();
     let vsparkle_heart = vec![240, 159, 119, 150];
 
-    sopt.push_str(" -d");
+    let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    vrqlngs.push(String::from("en"));
-
-    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &sopt);
+    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
 
     println!("sparkle_heart: '{}'", srsout);
 
@@ -535,16 +525,11 @@ fn two_hearts_center() {
     //-------------------------------------
     //Read the Application Parameters
 
-    let mut vrqlngs: Vec<String> = Vec::new();
-
-    let mut sopt = String::new();
     let vsparkle_heart = vec![240, 159, 146, 150, 119, 250, 240, 159, 146, 150];
 
-    sopt.push_str(" -d");
+    let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    vrqlngs.push(String::from("en"));
-
-    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &sopt);
+    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
 
     println!("sparkle_heart: '{}'", srsout);
 
@@ -556,16 +541,11 @@ fn two_hearts_start() {
     //-------------------------------------
     //Read the Application Parameters
 
-    let mut vrqlngs: Vec<String> = Vec::new();
-
-    let mut sopt = String::new();
     let vsparkle_heart = vec![250, 240, 159, 146, 150, 119, 240, 159, 146, 150];
 
-    sopt.push_str(" -d");
+    let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    vrqlngs.push(String::from("en"));
-
-    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &sopt);
+    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
 
     println!("sparkle_heart: '{}'", srsout);
 
@@ -577,16 +557,11 @@ fn two_hearts_end() {
     //-------------------------------------
     //Read the Application Parameters
 
-    let mut vrqlngs: Vec<String> = Vec::new();
-
-    let mut sopt = String::new();
     let vsparkle_heart = vec![240, 159, 146, 150, 119, 240, 159, 146, 150, 250];
 
-    sopt.push_str(" -d");
+    let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    vrqlngs.push(String::from("en"));
-
-    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &sopt);
+    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
 
     println!("sparkle_heart: '{}'", srsout);
 
@@ -598,18 +573,13 @@ fn hearts_game() {
     //-------------------------------------
     //Read the Application Parameters
 
-    let mut vrqlngs: Vec<String> = Vec::new();
-
-    let mut sopt = String::new();
     let vsparkle_heart = vec![
         226, 157, 164, 240, 159, 146, 150, 119, 250, 248, 240, 159, 146, 150, 247, 190,
     ];
 
-    sopt.push_str(" -d");
+    let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    vrqlngs.push(String::from("en"));
-
-    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &sopt);
+    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
 
     println!("sparkle_heart: '{}'", srsout);
 

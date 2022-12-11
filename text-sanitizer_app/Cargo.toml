@@ -9,7 +9,7 @@ homepage = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
 documentation = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
 repository = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
 license = "Apache-2.0"
-keywords = ["text-processing", "graphics"]
+keywords = ["text-processing", "utf-8", "unicode", "ascii", "sanitizing" ]
 categories = ["command-line-utilities", "command-line-interface", "text-processing", "parsing"]
 
 [lib]

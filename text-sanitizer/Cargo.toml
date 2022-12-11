@@ -1,14 +1,14 @@
 [package]
 name = "text-sanitizer"
-version = "1.4.2"
+version = "1.4.3"
 authors = ["Bodo Hugo Barwich <b.barwich@hotmail.com>"]
 edition = "2018"
 description = "convert text to plain ASCII text"
-readme = "../README.md"
+readme = "README.md"
 homepage = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
 documentation = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
 repository = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
 license = "Apache-2.0"
-keywords = ["text-processing", "graphics"]
+keywords = ["text-processing", "utf-8", "unicode", "ascii", "sanitizing" ]
 categories = ["text-processing", "parsing"]
 exclude = ["/doc"]
