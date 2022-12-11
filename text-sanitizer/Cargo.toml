@@ -1,6 +1,6 @@
 [package]
 name = "text-sanitizer"
-version = "1.4.4"
+version = "1.4.5"
 authors = ["Bodo Hugo Barwich <b.barwich@hotmail.com>"]
 edition = "2018"
 description = "convert text to plain ASCII text"
