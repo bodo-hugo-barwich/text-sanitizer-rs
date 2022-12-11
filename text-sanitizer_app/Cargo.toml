@@ -3,6 +3,14 @@ name = "text-sanitizer_app"
 version = "1.2.0"
 authors = ["Bodo Hugo Barwich <b.barwich@hotmail.com>"]
 edition = "2018"
+description = "command line application to convert text to plain ASCII text"
+readme = "../README.md"
+homepage = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
+documentation = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
+repository = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
+license = "Apache-2.0"
+keywords = ["text-processing", "graphics"]
+categories = ["command-line-utilities", "command-line-interface", "text-processing", "parsing"]
 
 [lib]
 name = "sanitizer_app"
@@ -16,4 +24,4 @@ path = "src/main.rs"
 name = "nut-monitor"
 
 [dependencies]
-text-sanitizer = { path = "../text-sanitizer" }
+text-sanitizer = { path = "../text-sanitizer", version = "1.4" }
