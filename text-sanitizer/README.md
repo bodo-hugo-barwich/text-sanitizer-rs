@@ -40,7 +40,7 @@ fn sparkle_heart() {
 ```
 Considering this example where the data in the center is corrupted somehow:
 This data cannot be parsed by normal _Rust_ libraries and the containing valid information would be lost.
-```
+```rust
 use text_sanitizer::sanitizer;
 
 fn two_hearts_center() {
