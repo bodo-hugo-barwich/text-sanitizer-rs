@@ -212,6 +212,15 @@ pub fn parse_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
     parse_result
 }
 
+
+/// Parses the given reference to raw text data as array of bytes `u8` into
+/// a new valid `std::str::String`. \
+/// Parameters:\
+/// * `text` - raw text data as array of bytes `u8`
+/// * `vrqlanguages` - Vector of language references. Currently only 'en', 'es' and 'de'
+/// are recognized.
+/// * `options` - reference to a string. Like command line arguments '-b', '-q' and '-d' and '-v'
+/// are recognized.
 pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> String {
     //-------------------------------------
     //Read the Function Options
