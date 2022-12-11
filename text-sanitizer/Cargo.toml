@@ -11,3 +11,4 @@ repository = "https://github.com/bodo-hugo-barwich/text-sanitizer-rs"
 license = "Apache-2.0"
 keywords = ["text-processing", "graphics"]
 categories = ["text-processing", "parsing"]
+exclude = ["/doc"]
