@@ -1,0 +1,5 @@
+This software makes use of the "text-sanitizer" Rust crate developed by
+Bodo (Hugo) Barwich <b.barwich@hotmail.com>
+
+The original source code can be found at:
+https://github.com/bodo-hugo-barwich/text-sanitizer-rs
