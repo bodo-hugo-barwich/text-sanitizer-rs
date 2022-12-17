@@ -47,11 +47,15 @@ use text_sanitizer::sanitizer;
 fn two_hearts_center() {
     //-------------------------------------
     // Test data contains 2 Sparkle Hearts but is corrupted in the center
+    // According to the Official Standard Library Documentation at:
+    // https://doc.rust-lang.org/std/string/struct.String.html#method.from_utf8
+    // this would produce a FromUtf8Error or panic the application
+    // when used with unwrap()
 
     let vsparkle_heart = vec![240, 159, 146, 150, 119, 250, 240, 159, 146, 150];
     let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
+    let srsout = sanitizer::sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
 
     println!("sparkle_heart: '{}'", srsout);
 

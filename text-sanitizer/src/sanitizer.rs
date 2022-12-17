@@ -14,6 +14,7 @@
 use std::collections::HashMap;
 use std::str;
 
+#[doc(hidden)]
 pub fn from_utf8_lossy(mut input: &[u8]) -> String {
     let mut sanitized = String::with_capacity(input.len());
 
@@ -76,6 +77,8 @@ pub fn from_utf8_lossy(mut input: &[u8]) -> String {
     sanitized
 }
 
+#[doc(hidden)]
+// Parse byte sequence into unicode sequence strings
 pub fn build_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String> {
     let mut build_result: Vec<String> = Vec::new();
     let mut suni: String;
@@ -186,6 +189,8 @@ pub fn build_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
     build_result
 }
 
+#[doc(hidden)]
+// A sequence of bytes is parsed into multiple characters or ascii symbols
 pub fn parse_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String> {
     let mut parse_result: Vec<String> = Vec::new();
 
@@ -214,13 +219,39 @@ pub fn parse_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
 
 
 /// Parses the given reference to raw text data as array of bytes `u8` into
-/// a new valid `std::str::String`. \
-/// Parameters:\
+/// a new valid `std::str::String`.
+///
+/// # Parameters:
+///
 /// * `text` - raw text data as array of bytes `u8`
 /// * `vrqlanguages` - Vector of language references. Currently only 'en', 'es' and 'de'
 /// are recognized.
 /// * `options` - reference to a string. Like command line arguments '-b', '-q' and '-d' and '-v'
 /// are recognized.
+///
+/// # Examples:
+///
+/// Test data is the Sparkle Heart from the UTF-8 documentation examples but it is broken.\
+/// According to the Official Standard Library Documentation at:\
+/// [std::string::String::from_utf8()](https://doc.rust-lang.org/std/string/struct.String.html#method.from_utf8)\
+/// this would produce a `FromUtf8Error` or **panic** the application
+/// when used with `unwrap()`
+/// ```
+///    //-------------------------------------
+///    // Test data is the Sparkle Heart from the UTF-8 documentation examples but it is broken
+///
+///    use text_sanitizer::sanitizer::sanitize_u8;
+///
+///    let vsparkle_heart = vec![240, 159, 119, 150];
+///
+///    let vrqlngs: Vec<String> = vec![String::from("en")];
+///
+///    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
+///
+///    println!("sparkle_heart: '{}'", srsout);
+///
+///    assert_eq!(srsout, "(?f0)(?9f)w(?96)");
+/// ```
 pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> String {
     //-------------------------------------
     //Read the Function Options
