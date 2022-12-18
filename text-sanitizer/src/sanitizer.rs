@@ -1,7 +1,7 @@
 #![allow(unused)]
 /*
 * @author Bodo (Hugo) Barwich
-* @version 2022-11-03
+* @version 2022-12-18
 * @package text-sanitizer
 * @subpackage sanitizer.rs
 
@@ -246,7 +246,7 @@ pub fn parse_unicode(sequence: &[u8], bdebug: bool, bquiet: bool) -> Vec<String>
 ///
 ///    let vrqlngs: Vec<String> = vec![String::from("en")];
 ///
-///    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &" -d");
+///    let srsout = sanitize_u8(&vsparkle_heart, &vrqlngs, &"");
 ///
 ///    println!("sparkle_heart: '{}'", srsout);
 ///
@@ -282,12 +282,14 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
     let mut rplmap = HashMap::new();
     let mut olngrplmap = None;
 
-    let mut lngrplmap = HashMap::with_capacity(10);
+    let mut lngrplmap = HashMap::with_capacity(12);
 
     lngrplmap.insert("d", "");
     lngrplmap.insert("1b", "");
     lngrplmap.insert("bb", "\"");
     lngrplmap.insert("ab", "\"");
+    lngrplmap.insert("80", "EUR");
+    lngrplmap.insert("20ac", "EUR");
     lngrplmap.insert("25cf", "*");
     lngrplmap.insert("251c", "|-");
     lngrplmap.insert("2514", "|-");
