@@ -1,6 +1,6 @@
 [package]
 name = "text-sanitizer_app"
-version = "1.2.0"
+version = "1.2.1"
 authors = ["Bodo Hugo Barwich <b.barwich@hotmail.com>"]
 edition = "2018"
 description = "command line application to convert text to plain ASCII text"
@@ -24,4 +24,4 @@ path = "src/main.rs"
 name = "nut-monitor"
 
 [dependencies]
-text-sanitizer = { path = "../text-sanitizer", version = "1.4" }
+text-sanitizer = { path = "../text-sanitizer", version = "1.5" }
