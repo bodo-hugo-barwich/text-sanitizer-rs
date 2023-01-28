@@ -159,6 +159,30 @@ impl TextSanitizer {
         } //if(!options.is_empty())
     }
 
+    /// Adds a Language Shortcode to the Vector of applied Language Replacement Maps.\
+    /// In the order in which the Language Shortcode is added is the order in which they
+    /// are applied to the Input Data.
+    ///
+    /// # Parameters:
+    ///
+    /// * `slanguage` - language shortcode. Currently only 'en', 'es' and 'de'
+    /// are recognized.
+    ///
+    /// # Examples:
+    ///
+    /// This example activates the "en" Language Replacement Map.\
+    /// This Language Replacement Map holds replacements that are not language specific.\
+    /// Like the Unicode Symbol Sparkling Heart "U+1F496"
+    /// ```
+    ///    //-------------------------------------
+    ///    // Activate the "en" Language Replacement Map
+    ///
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.add_request_language(&"en");
+    /// ```
     pub fn add_request_language(&mut self, slanguage: &str) {
         let slang = String::from(slanguage);
 
@@ -167,6 +191,29 @@ impl TextSanitizer {
         }
     }
 
+    /// Clears the Vector of applied Language Replacement Maps.\
+    /// This is needed to change the order of applied Language Replacement Maps.
+    ///
+    /// # Examples:
+    ///
+    /// This example deactivates all Language Replacement Maps beside "es".\
+    /// This can be useful to fine tune the sanitization process and reduce unused overhead.
+    /// ```
+    ///    //-------------------------------------
+    ///    // Deactivate all Language Replacement Maps beside "es"
+    ///
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.add_request_language(&"en");
+    ///    sanitizer.add_request_language(&"de");
+    ///    sanitizer.add_request_language(&"es");
+    ///
+    ///    sanitizer.clear_request_languages();
+    ///
+    ///    sanitizer.add_request_language(&"es");
+    /// ```
     pub fn clear_request_languages(&mut self) {
         self._vrqlangs.clear();
     }
