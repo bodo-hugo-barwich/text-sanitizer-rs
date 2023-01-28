@@ -22,7 +22,7 @@ mod file_tests {
 
     extern crate text_sanitizer;
 
-    use text_sanitizer::sanitizer;
+    use text_sanitizer::TextSanitizer;
 
     // The derive implements <RuntimeOptions> == <RuntimeOptions> comparisons
     #[derive(PartialEq)]
@@ -238,17 +238,13 @@ mod file_tests {
             let vrsdta = read_file(&resultfile)?;
             let srsdta = String::from_utf8_lossy(&vrsdta).into_owned();
 
-            let mut vrqlngs: Vec<String> = Vec::new();
+            let mut sanitizer = TextSanitizer::new_with_options(false, true, false);
 
-            let mut sopt = String::new();
+            sanitizer.add_request_language(&"en");
+            sanitizer.add_request_language(&"es");
+            sanitizer.add_request_language(&"de");
 
-            sopt.push_str(" -d");
-
-            vrqlngs.push(String::from("en"));
-            vrqlngs.push(String::from("es"));
-            vrqlngs.push(String::from("de"));
-
-            let srsout = sanitizer::sanitize_u8(&vtstdta, &vrqlngs, &sopt);
+            let srsout = sanitizer.sanitize_u8(&vtstdta);
 
             if options.contains(&RuntimeOptions::Debug) && !options.contains(&RuntimeOptions::Quiet)
             {
