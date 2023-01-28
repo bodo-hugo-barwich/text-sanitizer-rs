@@ -14,16 +14,50 @@
 
 extern crate text_sanitizer;
 
-use text_sanitizer::sanitizer;
+use text_sanitizer::TextSanitizer;
 
 use std::io::{self, Read};
+
+/*
+extern crate serde; // 1.0.149;
+extern crate serde_yaml; // 0.8.26;
+
+use std::collections::HashMap;
+
+use serde_derive::{Deserialize, Serialize};
+*/
+
+/*
+#[derive(Debug, Deserialize, Serialize)]
+struct ConversionMap(HashMap<String, LanguageMap>);
+
+#[derive(Debug, Deserialize, Serialize)]
+struct LanguageMap(HashMap<String, String>);
+
+#[allow(unused_variables)]
+fn main() {
+    let conv_map_yaml = "---
+en:
+  'd': ''
+  '1b': ''
+  '20ac': 'EUR'
+de:
+  'fc': 'ue'
+  'f6': 'oe'
+";
+     // Deserialize it back to a Rust type.
+    let conv_map: ConversionMap = serde_yaml::from_str(&conv_map_yaml).unwrap();
+   println!("conv mp 0 dmp: {:?}", conv_map);
+}
+
+*/
 
 //==============================================================================
 // Structure RunTextSanitizer Declaration
 
 #[derive(Debug)]
 pub struct RunTextSanitizer {
-    //_sanitizer: MovementImporter::new(),
+    _sanitizer: TextSanitizer,
     _vinput: Vec<u8>,
     _srsout: String,
     _vrqlangs: Vec<String>,
@@ -55,7 +89,7 @@ impl RunTextSanitizer {
 
     pub fn new() -> RunTextSanitizer {
         let mut app = RunTextSanitizer {
-            //_sanitizer: TextSanitizer::new(),
+            _sanitizer: TextSanitizer::new(),
             _vinput: Vec::new(),
             _srsout: String::new(),
             _vrqlangs: Vec::new(),
@@ -66,16 +100,39 @@ impl RunTextSanitizer {
             _ierr: 0,
         };
 
-        app._init();
+        app.init();
 
-        //Return the New RunTextSanitizer Object
+        //Return the New Application Object
         app
     }
 
-    /*
-    #----------------------------------------------------------------------------
-    #Administration Methods
-    */
+    pub fn new_with_options(
+        bimport: bool,
+        bquiet: bool,
+        bdebug: bool,
+        bprofiling: bool,
+    ) -> RunTextSanitizer {
+        let mut app = RunTextSanitizer {
+            _sanitizer: TextSanitizer::new(),
+            _vinput: Vec::new(),
+            _srsout: String::new(),
+            _vrqlangs: Vec::new(),
+            _bimport: bimport,
+            _bquiet: bquiet,
+            _bdebug: bdebug,
+            _bprofiling: bprofiling,
+            _ierr: 0,
+        };
+
+        app.init();
+
+        //Return the New Application Object
+        app
+    }
+
+    /*----------------------------------------------------------------------------
+     * Administration Methods
+     */
 
     pub fn set_import(&mut self, bimport: bool) {
         self._bimport = bimport;
@@ -84,19 +141,19 @@ impl RunTextSanitizer {
     pub fn set_quiet(&mut self, bquiet: bool) {
         self._bquiet = bquiet;
 
-        // self._sanitizer.set_quiet(bquiet);
+        self._sanitizer.set_quiet(bquiet);
     }
 
     pub fn set_debug(&mut self, bdebug: bool) {
         self._bdebug = bdebug;
 
-        // self._sanitizer.set_debug(bdebug);
+        self._sanitizer.set_debug(bdebug);
     }
 
     pub fn set_profiling(&mut self, bprofiling: bool) {
         self._bprofiling = bprofiling;
 
-        // self._sanitizer.set_profiling(bprofiling);
+        self._sanitizer.set_profiling(bprofiling);
     }
 
     pub fn add_request_language(&mut self, slanguage: &str) {
@@ -105,13 +162,19 @@ impl RunTextSanitizer {
         if !self._vrqlangs.contains(&slang) {
             self._vrqlangs.push(slang);
         }
+
+        self._sanitizer.add_request_language(slanguage);
     }
 
-    fn _init(&mut self) {
-        self._vrqlangs.push(String::from("en"));
+    fn init(&mut self) {
+        self.add_request_language(&"en");
     }
 
-    fn input_from_stdin(&mut self) -> i32 {
+    fn set_input(&mut self, mut vinput: Vec<u8>) {
+        self._vinput = vinput.drain(0..).collect();
+    }
+
+    pub fn input_from_stdin(&mut self) -> i32 {
         //-------------------------------------
         //Read the Input Data from STDIN
 
@@ -146,16 +209,6 @@ impl RunTextSanitizer {
         //-------------------------------------
         //Parse the Input Data
 
-        let mut sopt = String::new();
-
-        if self._bquiet {
-            sopt.push_str(" -q");
-        }
-
-        if self._bdebug {
-            sopt.push_str(" -d");
-        }
-
         //  let duration_parse = SystemTime::now();
 
         //  if self._bprofiling {
@@ -165,7 +218,7 @@ impl RunTextSanitizer {
         //    }
         //  }  //if self._bprofiling
 
-        self._srsout = sanitizer::sanitize_u8(&self._vinput, &self._vrqlangs, &sopt);
+        self._srsout = self._sanitizer.sanitize_u8(&self._vinput);
 
         //  if self._bprofiling {
         //    match duration_parse.elapsed() {
@@ -225,6 +278,10 @@ impl RunTextSanitizer {
         self._bprofiling
     }
 
+    pub fn get_output(&self) -> &str {
+        self._srsout.as_str()
+    }
+
     fn output_to_stdout(&self) -> i32 {
         //        let data = self._importer.export_accounts_str();
 
@@ -266,4 +323,28 @@ fn remove_match<T: PartialEq>(vvector: &mut Vec<T>, search: &T) -> Option<usize>
     //eprintln!("remove_match rs: '{:?}'\n", oipos);
 
     oipos
+}
+
+//==============================================================================
+// Unit Tests
+
+#[test]
+fn app_sparkle_heart() {
+    //-------------------------------------
+    // Test data is the Sparkle Heart from the UTF-8 documentation examples
+
+    let vsparkle_heart = vec![240, 159, 146, 150];
+
+    let mut app = RunTextSanitizer::new_with_options(false, false, true, false);
+
+    app.add_request_language(&"en");
+    app.set_input(vsparkle_heart);
+
+    app.do_sanitze();
+
+    let srsout = app.get_output();
+
+    println!("sparkle_heart: '{}'", srsout);
+
+    assert_eq!(srsout, "<3");
 }
