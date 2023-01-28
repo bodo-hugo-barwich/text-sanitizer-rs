@@ -25,3 +25,5 @@
 //! encoded should be "U+20AC"
 
 pub mod sanitizer;
+
+pub use sanitizer::TextSanitizer;
