@@ -1,5 +1,6 @@
 #Exclude Project Files
 .project
+.pydevproject
 Cargo.lock
 textsanitizer_rs
 textsanitizer_rs/*
