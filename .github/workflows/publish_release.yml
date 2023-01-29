@@ -40,6 +40,7 @@ jobs:
       - name: Check Repository for Cargo Version Tag
         id: git_tag
         run: |
+          git fetch --tags
           tag_label=`git tag -l "${{ steps.cargo_version.outputs.version }}"`
           tag_exists=`echo -n "$tag_label" | wc -l`
           echo "tag=$tag_label" >> $GITHUB_OUTPUT
