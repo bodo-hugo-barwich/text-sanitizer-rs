@@ -42,15 +42,17 @@ jobs:
         run: |
           tag_label=`git tag -l "${{ steps.cargo_version.outputs.version }}"`
           tag_exists=`echo -n "$tag_label" | wc -l`
-          echo -e "tag=${tag_label}\nexists=${tag_exists}" >> $GITHUB_OUTPUT
+          echo "tag=${tag_label}" >> $GITHUB_OUTPUT
+          echo "exists=${tag_exists}" >> $GITHUB_OUTPUT
         
       - name: Tag the Repository with Cargo Version Tag
         id: git_tag_set
         if: steps.git_tag.outputs.exists == 0
         run: |
+          echo "tag: '${{ steps.git_tag.outputs.tag }}'; exists: '${{ steps.git_tag.outputs.exists }}'"
           git config user.email "42355798+bodo-hugo-barwich@users.noreply.github.com"
           git config user.name "Bodo Hugo Barwich"
-          git tag -a "${{ steps.cargo_version.outputs.version }}" -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
+          git tag -a "${{ steps.git_tag.outputs.tag }}" -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
           git push origin ${{ steps.cargo_version.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_RELEASE_TOKEN }}       
