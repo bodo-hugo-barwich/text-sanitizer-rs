@@ -22,6 +22,9 @@ jobs:
       - name: Check for Manual Launch 
         if: github.event_name == 'workflow_dispatch'
         run: echo "Event '${{ github.event_name }}' - Manual Push to Registry" 
+
+      - name: Install Python Dependencies
+        run: sudo apt-get update && sudo apt-get install python3-toml
       
       - name: Checkout
         uses: actions/checkout@v2
