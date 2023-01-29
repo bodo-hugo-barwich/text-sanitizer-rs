@@ -47,7 +47,10 @@ jobs:
       - name: Tag the Repository with Cargo Version Tag
         id: git_tag_set
         if: steps.git_tag.outputs.exists == 0
-        run: git tag -a "${{ steps.cargo_version.outputs.version }}" -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
+        run: |
+          git config user.email "42355798+bodo-hugo-barwich@users.noreply.github.com"
+          git config user.name "Bodo Hugo Barwich"
+          git tag -a "${{ steps.cargo_version.outputs.version }}" -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_RELEASE_TOKEN }}       
           
