@@ -1,0 +1,26 @@
+name: Publish new Release
+
+# only trigger on pull request closed events
+on:
+  pull_request:
+    types: [ closed ]
+  workflow_dispatch:
+     branches:    
+      - master  
+
+jobs:
+  publish_release:
+    # this job will only run if the PR has been merged
+    if: (github.event.pull_request.merged == true) || (github.event_name == 'workflow_dispatch') 
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check the Pull Request 
+        if: github.event.pull_request != null 
+        run: echo "Event '${{ github.event_name }}' - PR ${{ github.event.pull_request.number }} has been merged"
+      
+      - name: Check for Manual Launch 
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "Event '${{ github.event_name }}' - Manual Push to Registry" 
+      
+      - name: Checkout
+        uses: actions/checkout@v2
