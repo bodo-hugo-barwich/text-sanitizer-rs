@@ -63,7 +63,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.git_tag.outputs.tag }}
-          token: ${{ secrets.GITHUB_RELEASE_TOKEN }}
+          token: ${{ secrets.PROJECT_RELEASE_TOKEN }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_RELEASE_TOKEN }}       
+          GITHUB_TOKEN: ${{ secrets.PROJECT_RELEASE_TOKEN }}       
           
