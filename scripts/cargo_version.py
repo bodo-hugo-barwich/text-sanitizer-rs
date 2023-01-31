@@ -53,11 +53,11 @@ def parse_cargo_files(cargo_files):
                 package = toml.load(f)
                 f.close()
 
+            package['file'] = file
+
             if module_debug:
                 print("script '{}' - Cargo File '{}': File read.".format(
                     module_file, file))
-
-            if module_debug:
                 print(
                     "script '{}' - Cargo Package:\n{}".format(module_file, str(package)))
 
@@ -220,7 +220,7 @@ for search in packages_search:
         versions_res[search] = 0
 
         if 'package' in package_res:
-            versions_res[search] = package_res['package']['version']
+            versions_res[search] = {'version': package_res['package']['version'], 'file': package_res['file']}
 
     else:
         if not module_quiet:
@@ -238,7 +238,7 @@ if module_debug:
 if module_output == 'plain':
     print("script '{}' - Cargo Versions:".format(module_file))
     for search in versions_res:
-        print("{}={}".format(search, versions_res[search]))
+        print("{}@{}={}".format(search, versions_res[search]['file'], versions_res[search]['version']))
 
 elif module_output == 'json':
     print("{}".format(json.dumps(versions_res)))
