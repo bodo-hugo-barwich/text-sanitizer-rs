@@ -35,24 +35,35 @@ jobs:
           cargo_version=`scripts/cargo_version.py text-sanitizer | grep -i "text-sanitizer" | cut -d"=" -f2`
           if [ -z cargo_version ]; then echo "could not find CARGO VERSION"; exit 1; fi;
           version_tag="v$cargo_version"
-          echo "::set-output name=version::$version_tag"
+          echo "version=$version_tag" >> $GITHUB_OUTPUT
           
       - name: Check Repository for Cargo Version Tag
         id: git_tag
         run: |
+          git fetch --tags
           tag_label=`git tag -l "${{ steps.cargo_version.outputs.version }}"`
-          tag_exists=`echo -n "$tag_label" | wc -l`
-          echo "::set-output name=tag::$tag_label name=exists::$tag_exists"
+          if [ -z $tag_label ]; then tag_exists=0; else tag_exists=1; fi;
+          echo "tag=$tag_label" >> $GITHUB_OUTPUT
+          echo "exists=$tag_exists" >> $GITHUB_OUTPUT
         
       - name: Tag the Repository with Cargo Version Tag
         id: git_tag_set
         if: steps.git_tag.outputs.exists == 0
-        run: git -a "${{ steps.cargo_version.outputs.version }}" -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"       
+        run: |
+          echo "git - tag: '${{ steps.git_tag.outputs.tag }}'; exists: '${{ steps.git_tag.outputs.exists }}'"
+          git config user.email "42355798+bodo-hugo-barwich@users.noreply.github.com"
+          git config user.name "Bodo Hugo Barwich"
+          git tag -a "${{ steps.cargo_version.outputs.version }}" -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
+          git push origin ${{ steps.cargo_version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_RELEASE_TOKEN }}       
           
       - name: Create Release
         id: release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.git_tag.outputs.tag }}
-          token: ${{ secrets.GITHUB_RELEASE_TOKEN }}
+          token: ${{ secrets.PROJECT_RELEASE_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECT_RELEASE_TOKEN }}       
           
