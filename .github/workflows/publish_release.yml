@@ -59,6 +59,7 @@ jobs:
           git config user.name "Bodo Hugo Barwich"
           git tag -a "${{ steps.cargo_version.outputs.version }}" -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
           git push origin ${{ steps.cargo_version.outputs.version }}
+          git fetch --tags
           git checkout ${{ steps.cargo_version.outputs.version }}
           
       - name: Build Release Version
