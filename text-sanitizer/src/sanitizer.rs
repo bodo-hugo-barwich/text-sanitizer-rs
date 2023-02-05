@@ -72,6 +72,8 @@ impl TextSanitizer {
     ///
     /// Create a `TextSanitizer` object with debugging enabled
     /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
     ///    let mut sanitizer = TextSanitizer::new_with_options(false, true, false);
     ///
     ///    sanitizer.add_request_language(&"en");
@@ -154,6 +156,8 @@ impl TextSanitizer {
     ///
     /// Create a `TextSanitizer` object and enable debugging
     /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
     ///    let mut sanitizer = TextSanitizer::new();
     ///
     ///    sanitizer.set_debug(true);
