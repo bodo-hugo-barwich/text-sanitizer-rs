@@ -74,7 +74,7 @@ jobs:
         if: steps.git_tag.outputs.exists == 0
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.git_tag.outputs.tag }}
+          tag_name: ${{ steps.cargo_version.outputs.version }}
           token: ${{ secrets.PROJECT_RELEASE_TOKEN }}
           files: text-sanitizer_${{ steps.cargo_version.outputs.version }}.tar.gz
         env:
