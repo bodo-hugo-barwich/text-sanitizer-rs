@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-20.04
     # Docker Hub image that `publish_release` executes in
     # This will compile the release binary for Ubuntu Xenial
-    container: ubuntu:xenial
+    # container: ubuntu:xenial
     
     steps:
       - name: Check the Pull Request 
@@ -28,7 +28,7 @@ jobs:
         run: echo "Event '${{ github.event_name }}' - Manual Push to Registry" 
 
       - name: Install Python Dependencies
-        run: apt-get update && apt-get -y install python3-toml
+        run: sudo apt-get update && sudo apt-get -y install git python3-toml
       
       - name: Checkout
         uses: actions/checkout@v2
