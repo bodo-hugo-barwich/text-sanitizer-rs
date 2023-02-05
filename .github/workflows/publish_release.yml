@@ -85,7 +85,14 @@ jobs:
         if: steps.git_tag.outputs.exists == 0
         run: |
           cd text-sanitizer
-          cargo publish --verbose
+          cargo publish --verbose 2>cargo-publish_error.log > cargo-publish.log
+          publish_res=$?
+          duplicated=`cat cargo-publish_error.log | grep -i "already uploaded" | wc -l`
+          echo "Crates.io Publishing Report:"
+          cat cargo-publish.log
+          echo "Crates.io Publishing Error:"
+          cat cargo-publish_error.log
+          if [ $duplicated -ne 1 ]; then exit $publish_res ; fi;
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_PUBLISH_TOKEN }}       
           
