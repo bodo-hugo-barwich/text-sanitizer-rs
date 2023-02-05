@@ -29,5 +29,5 @@ jobs:
         start_time=`date +"%s.%N"` 
         time cat tests/data/lanzarote-com_de-ausfluge.html | target/release/text-sanitizer -i en es de > lz_prof_result.html
         end_time=`date +"%s.%N"`
-        processing_time=`echo "scale=3; ${end_time}-${start_time}"
+        processing_time=`echo "scale=3; ${end_time}-${start_time}" | bc -l`
         echo "processing time: '$processing_time' s"
