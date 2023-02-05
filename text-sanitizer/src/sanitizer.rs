@@ -1,7 +1,7 @@
 #![allow(unused)]
 /*
 * @author Bodo (Hugo) Barwich
-* @version 2022-12-18
+* @version 2023-02-04
 * @package text-sanitizer
 * @subpackage sanitizer.rs
 
@@ -59,6 +59,23 @@ impl TextSanitizer {
         sanitizer
     }
 
+    /// This Constructor already sets the most used runtime options.
+    ///
+    /// # Parameters:
+    ///
+    /// * `bquiet` - do not print any messages not even errors.
+    /// * `bdebug` - do print detailed activity messages.
+    /// * `bprofiling` - profile the internal processing activities. (currently not implemented
+    /// because it affects performance)
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object with debugging enabled
+    /// ```
+    ///    let mut sanitizer = TextSanitizer::new_with_options(false, true, false);
+    ///
+    ///    sanitizer.add_request_language(&"en");
+    /// ```
     pub fn new_with_options(bquiet: bool, bdebug: bool, bprofiling: bool) -> TextSanitizer {
         let mut sanitizer = TextSanitizer {
             _conv_map: HashMap::new(),
@@ -126,6 +143,21 @@ impl TextSanitizer {
         self._bquiet = bquiet;
     }
 
+    /// This enables very verbose activity reports.\
+    /// This is mostly useful to troubleshoot raw data input and character conversions
+    ///
+    /// # Parameter:
+    ///
+    /// * `bdebug` - do print detailed activity messages.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object and enable debugging
+    /// ```
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.set_debug(true);
+    /// ```
     pub fn set_debug(&mut self, bdebug: bool) {
         self._bdebug = bdebug;
     }
@@ -218,6 +250,7 @@ impl TextSanitizer {
         self._vrqlangs.clear();
     }
 
+    #[doc(hidden)]
     fn init(&mut self) {
         let mut lngrplmap: HashMap<String, String> = HashMap::with_capacity(12);
 
