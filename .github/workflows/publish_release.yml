@@ -80,7 +80,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PROJECT_RELEASE_TOKEN }}       
                       
       - name: Crates.io Publish
-        id: release
+        id: publish
         if: steps.git_tag.outputs.exists == 0
         run: |
           cd text-sanitizer
