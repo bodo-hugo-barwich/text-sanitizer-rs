@@ -21,6 +21,30 @@ which introduces performance penality on bigger data.\
 `text-sanitizer` does not depend on proper encoding detection and relies only on an internal customizable convertion map.
 
 ## Usage
+### Object Oriented Method
+When several sanitization operations are executed the Conversion Map can be reused.\
+This is more resource saving and results also in a Micro Optimization.
+For example Web Server can benefit from this.
+```rust
+    //-------------------------------------
+    // Test data is the Sparkle Heart from the UTF-8 documentation examples
+
+    use text_sanitizer::TextSanitizer;
+
+    let vsparkle_heart = vec![240, 159, 146, 150];
+
+    let mut sanitizer = TextSanitizer::new_with_options(false, true, false);
+
+    sanitizer.add_request_language(&"en");
+
+    let srsout = sanitizer.sanitize_u8(&vsparkle_heart);
+
+    println!("sparkle_heart: '{}'", srsout);
+
+    assert_eq!(srsout, "<3");
+```
+
+### Procedural Method
 The `sanitizer::sanitize_u8()` function takes the raw data and creates a new valid UTF-8 `std::str::String` from it.
 ```rust
 

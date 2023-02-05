@@ -22,5 +22,12 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
       
+    - name: Build Release Version
+      run: cargo build --release --verbose
     - name: Profile Sanitizing 27KB Document
-      run: time cat tests/data/lanzarote-com_de-ausfluge.html | target/debug/text-sanitizer -i en es de > lz_prof_result.html
+      run: |
+        start_time=`date +"%s.%N"` 
+        time cat tests/data/lanzarote-com_de-ausfluge.html | target/release/text-sanitizer -i en es de > lz_prof_result.html
+        end_time=`date +"%s.%N"`
+        processing_time=`echo "scale=3; ${end_time}-${start_time}" | bc -l`
+        echo "processing time: '$processing_time' s"
