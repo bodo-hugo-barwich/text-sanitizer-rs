@@ -1,7 +1,7 @@
 #![allow(unused)]
 /*
 * @author Bodo (Hugo) Barwich
-* @version 2023-02-04
+* @version 2023-02-25
 * @package text-sanitizer
 * @subpackage sanitizer.rs
 
@@ -144,6 +144,23 @@ impl TextSanitizer {
      * Administration Methods
      */
 
+    /// This enables quiet execution.\
+    /// This will not print any warnings only the result data.
+    ///
+    /// # Parameter:
+    ///
+    /// * `bquiet` - don't print any warnings.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object and enable debugging
+    /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.set_quiet(true);
+    /// ```
     pub fn set_quiet(&mut self, bquiet: bool) {
         self._bquiet = bquiet;
     }
