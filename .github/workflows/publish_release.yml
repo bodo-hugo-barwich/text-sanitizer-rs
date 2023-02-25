@@ -86,7 +86,7 @@ jobs:
         if: steps.git_tag.outputs.exists == 0
         run: | 
           cargo build --release --verbose           
-          tar -C target/release/ -czf text-sanitizer_${{ steps.cargo_version.outputs.version }}.tar.gz text-sanitizer
+          tar -C target/release/ -czf text-sanitizer_${{ steps.cargo_version.outputs.version_filename }}.tar.gz text-sanitizer
           
       - name: Create Release
         id: release
@@ -104,7 +104,7 @@ jobs:
         if: steps.git_tag.outputs.exists == 0
         run: |
           cd text-sanitizer
-          cargo publish --verbose 2>cargo-publish_error.log > cargo-publish.log
+          cargo publish --verbose 2>cargo-publish_error.log > cargo-publish.log || true
           publish_res=$?
           duplicated=`cat cargo-publish_error.log | grep -i "already uploaded" | wc -l`
           echo "Crates.io Publishing Report:"
