@@ -95,7 +95,7 @@ jobs:
         with:
           tag_name: ${{ steps.cargo_version.outputs.version }}
           token: ${{ secrets.PROJECT_RELEASE_TOKEN }}
-          files: text-sanitizer_${{ steps.cargo_version.outputs.version }}.tar.gz
+          files: text-sanitizer_${{ steps.cargo_version.outputs.version_filename }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.PROJECT_RELEASE_TOKEN }}       
                       
