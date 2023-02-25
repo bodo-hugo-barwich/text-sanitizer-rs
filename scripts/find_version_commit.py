@@ -175,6 +175,9 @@ for arg in sys.argv:
                 module_quiet = True
     else:
         if arg.rfind(module_file, 0) == -1:
+            if arg[0] == '^':
+                arg = arg[1: len(arg)]
+
             if len(arg) > 7:
                 commit_search.append(arg[0: 7])
             else:
