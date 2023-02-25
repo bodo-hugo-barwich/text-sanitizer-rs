@@ -28,7 +28,10 @@ jobs:
         run: echo "Event '${{ github.event_name }}' - Manual Push to Registry" 
 
       - name: Install Python Dependencies
-        run: sudo apt-get update && sudo apt-get -y install git python3-toml python3-git
+        run: | 
+          python3 --version
+          sudo apt-get update && sudo apt-get -y install git python3-toml python3-git
+        
       
       - name: Checkout
         uses: actions/checkout@v2
@@ -62,7 +65,7 @@ jobs:
         if: steps.git_tag.outputs.exists == 0
         run: |
           echo "git - tag: '${{ steps.git_tag.outputs.tag }}'; exists: '${{ steps.git_tag.outputs.exists }}'"
-          find_commit_res=`scripts/find_version_commit.py "${{ steps.cargo_version.outputs.version_commit }}"`
+          find_commit_res=`scripts/find_version_commit.py "${{ steps.cargo_version.outputs.version_commit }}" | grep -i " by "`
           if [ -z $find_commit_res ]; then echo "could not find GIT VERSION COMMIT"; exit 1; fi;
           echo "git - commit: $find_commit_res"
           merge_commit=`echo "$find_commit_res" | cut -d' ' -f1 | cut -d'/' -f2`

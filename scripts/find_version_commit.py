@@ -46,7 +46,7 @@ def git_history(module_name, git):
 
     for line in history_lines:
         if line[0: 6] == 'commit':
-            commit_hash = line.removeprefix('commit ')
+            commit_hash = line.split(' ')[1]
             commit = {'hash': commit_hash,
                       'hash_short': commit_hash[0: 7],
                       'raw': [],
@@ -110,10 +110,7 @@ def find_merge_commit(history, commit):
     while commit_idx >= 0 and commit_merge is None:
         commit_search = history[commit_idx]
 
-        # print("commit search: '{}'".format(str(commit_search)))
-
         if 'merge' in commit_search:
-            print("commit search: HIT")
             commit_merge = commit_search
         else:
             commit_idx -= 1
