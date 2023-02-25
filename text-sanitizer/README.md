@@ -47,6 +47,7 @@ For example Web Server can benefit from this.
 ### Procedural Method
 The `sanitizer::sanitize_u8()` function takes the raw data and creates a new valid UTF-8 `std::str::String` from it.
 ```rust
+use text_sanitizer::sanitizer;
 
 fn sparkle_heart() {
     //-------------------------------------
