@@ -1,10 +1,22 @@
 #!/usr/bin/python3
 
+# @author Bodo (Hugo) Barwich
+# @version 2023-02-21
+# @package TextSanitizer
+# @subpackage scripts/cargo_version.py
+
+# This Module parses the .toml files of the project to find the Merge Commit for the Version
+#
+
 import sys
 import os
 import os.path
 import toml
 import json
+from git import Repo, GitCommandError
+import re
+from re import IGNORECASE, MULTILINE
+
 
 # ==============================================================================
 # Auxiliary Functions
@@ -36,7 +48,7 @@ def list_cargo_files(directory):
     return cargo_files
 
 
-def parse_cargo_files(cargo_files):
+def parse_cargo_files(module_name, cargo_files):
     packages_res = {'success': True, 'packages': {}}
 
     for file in cargo_files:
@@ -57,9 +69,9 @@ def parse_cargo_files(cargo_files):
 
             if module_debug:
                 print("script '{}' - Cargo File '{}': File read.".format(
-                    module_file, file))
+                    module_name, file))
                 print(
-                    "script '{}' - Cargo Package:\n{}".format(module_file, str(package)))
+                    "script '{}' - Cargo Package:\n{}".format(module_name, str(package)))
 
             if 'package' in package:
                 if 'name' in package:
@@ -71,13 +83,13 @@ def parse_cargo_files(cargo_files):
             if not module_quiet:
                 print(
                     "script '{}' - Cargo File '{}': Read File failed!".format(
-                        module_file, file), file=sys.stderr)
+                        module_name, file), file=sys.stderr)
                 print("script '{}' - Cargo File Exception Message: {}".format(
-                    module_file, str(e)), file=sys.stderr)
+                    module_name, str(e)), file=sys.stderr)
 
-            packages.result = 0
+            packages_res['success'] = False
 
-        if 'package_name' not in packages_res['packages']:
+        if package_name not in packages_res['packages']:
             packages_res['packages'][package_name] = package
         else:
             packages_res['packages'][directory_name] = package
@@ -107,12 +119,55 @@ def parse_parent_directory_name(filepath):
     return parent_name
 
 
+def git_commit_blame_file(module_name, git, filepath, search_text):
+    blame_result = {'success': True, 'commit': []}
+    blame_info = None
+
+    try:
+        blame_info = git.blame(filepath)
+    except GitCommandError as e:
+        if not module_quiet:
+            print(
+                "script '{}' - Cargo File '{}': Blame File failed!".format(
+                    module_name, filepath), file=sys.stderr)
+            print("script '{}' - Cargo File Exception Message: {}".format(
+                module_name, str(e)), file=sys.stderr)
+
+        blame_result['success'] = False
+
+    if module_debug:
+        print("blame info:'{}'".format(blame_info))
+
+    if blame_info is not None:
+        commit_search = re.compile(
+            '^([^\\(]+) (\\([^\\)]+\\)) {}'.format(search_text),
+            re.IGNORECASE | re.MULTILINE)
+
+        if module_debug:
+            print("commit search: '{}'".format(str(commit_search)))
+
+        commit_match = commit_search.search(blame_info)
+
+        if module_debug:
+            print("commit match: '{}'".format(commit_match))
+
+        if commit_match is not None:
+            blame_result['commit'].append(commit_match[0])
+            blame_result['commit'].append(commit_match[1])
+            blame_result['commit'].append(commit_match[2])
+        else:
+            blame_result['success'] = False
+
+    return blame_result
+
+
 # ==============================================================================
 # Executing Section
 
 
 # ------------------------
 # Script Environment
+
 module_file = ''
 module_path = os.path.abspath(__file__)
 main_dir = ''
@@ -171,6 +226,11 @@ if module_debug:
     print(
         "script '{}' - Search Output: '{}'".format(module_file, module_output))
 
+if len(packages_search) == 0:
+    print(
+        "script '{}' - Package Name is missing!".format(module_file))
+
+    module_res = 3
 
 # ------------------------
 # Scan for Cargo ".toml" files
@@ -196,7 +256,7 @@ if not cargo_files['success']:
 # ------------------------
 # Parse the Cargo files
 
-cargo_packages = parse_cargo_files(cargo_files['files'])
+cargo_packages = parse_cargo_files(module_file, cargo_files['files'])
 
 if module_debug:
     print("script '{}' - Cargo Packages [{}]:\n{}".format(
@@ -209,6 +269,9 @@ if not cargo_packages['success']:
 
     module_res = 1
 
+# ------------------------
+# Lookup the requested Packages
+
 for search in packages_search:
     if search in cargo_packages['packages']:
         package_res = cargo_packages['packages'][search]
@@ -220,25 +283,71 @@ for search in packages_search:
         versions_res[search] = 0
 
         if 'package' in package_res:
-            versions_res[search] = {'version': package_res['package']['version'], 'file': package_res['file']}
+            versions_res[search] = {
+                'version': package_res['package']['version'],
+                'file': package_res['file']}
+        else:
+            versions_res[search] = {'version': '', 'file': package_res['file']}
 
     else:
         if not module_quiet:
             print(
-                "script '{}' - Package Search '{}': Look up Package failed!\nPackage '{}': Cargo.toml file not found!".format(
-                    module_file, search, search),
+                "script '{}' - Package Search '{}': Look up Package failed!\n".format(
+                    module_file, search)
+                + "Package '{}': Cargo.toml file not found!".format(search),
                 file=sys.stderr)
 
         module_res = 1
+
+# ------------------------
+# Lookup the Version Commit
+
+repo = Repo('.git')
+git = repo.git
+
+for search in versions_res:
+    if 'version' in versions_res[search]:
+        commit_match = git_commit_blame_file(
+            module_file,
+            git,
+            versions_res[search]['file'],
+            'version = "{}"'.format(
+                versions_res[search]['version']))
+
+        if module_debug:
+            print(
+                "script '{}' - Version Commit:\n{}".format(module_file, str(commit_match)))
+
+        if commit_match['success']:
+            versions_res[search]['commit'] = commit_match['commit'][1]
+        else:
+            versions_res[search]['commit'] = ''
+
+    else:
+        versions_res[search]['commit'] = ''
 
 if module_debug:
     print(
         "script '{}' - Cargo Versions:\n{}".format(module_file, str(versions_res)))
 
+# ------------------------
+# Print the Version Result
+
 if module_output == 'plain':
-    print("script '{}' - Cargo Versions:".format(module_file))
-    for search in versions_res:
-        print("{}@{}={}".format(search, versions_res[search]['file'], versions_res[search]['version']))
+    if len(versions_res) > 0:
+        print("script '{}' - Cargo Versions:".format(module_file))
+
+        for search in versions_res:
+            if versions_res[search] != 0:
+                print("{}@{}={}@{}".format(search,
+                                           versions_res[search]['file'],
+                                           versions_res[search]['version'],
+                                           versions_res[search]['commit']))
+
+            else:
+                print("{} - no cargo version found!".format(search))
+
+                module_res = 1
 
 elif module_output == 'json':
     print("{}".format(json.dumps(versions_res)))
