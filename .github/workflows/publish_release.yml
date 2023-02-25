@@ -36,10 +36,15 @@ jobs:
       - name: Cargo Version for text-sanitizer
         id: cargo_version
         run: |
-          cargo_version=`scripts/cargo_version.py text-sanitizer | grep -i "text-sanitizer" | cut -d"=" -f2`
-          if [ -z cargo_version ]; then echo "could not find CARGO VERSION"; exit 1; fi;
-          version_tag="v$cargo_version"
+          cargo_version_res=`scripts/cargo_version.py text-sanitizer | grep -i "text-sanitizer"`
+          if [ -z $cargo_version_res ]; then echo "could not find CARGO VERSION"; exit 1; fi;
+          cargo_version=`echo "$cargo_version_res" | cut -d"=" -f2 | cut -d"@" -f1`
+          version_commit=`echo "$cargo_version_res" | cut -d"=" -f2 | cut -d"@" -f2`
+          version_tag="v$cargo_version"          
+          version_filename=`echo "$version_tag" | tr '.' '-'`
           echo "version=$version_tag" >> $GITHUB_OUTPUT
+          echo "version_commit=$version_commit" >> $GITHUB_OUTPUT
+          echo "version_filename=$version_filename" >> $GITHUB_OUTPUT
           
       - name: Check Repository for Cargo Version Tag
         id: git_tag
@@ -47,6 +52,7 @@ jobs:
           git fetch --tags
           tag_label=`git tag -l "${{ steps.cargo_version.outputs.version }}"`
           if [ -z $tag_label ]; then tag_exists=0; else tag_exists=1; fi;
+          echo "git - tag: '$tag_label'; exists: '$tag_exists'"
           echo "tag=$tag_label" >> $GITHUB_OUTPUT
           echo "exists=$tag_exists" >> $GITHUB_OUTPUT
         
@@ -55,9 +61,15 @@ jobs:
         if: steps.git_tag.outputs.exists == 0
         run: |
           echo "git - tag: '${{ steps.git_tag.outputs.tag }}'; exists: '${{ steps.git_tag.outputs.exists }}'"
-          git config user.email "42355798+bodo-hugo-barwich@users.noreply.github.com"
-          git config user.name "Bodo Hugo Barwich"
-          git tag -a "${{ steps.cargo_version.outputs.version }}" -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
+          find_commit_res=`scripts/find_version_commit.py ${{ steps.cargo_version.outputs.version_commit }}"`
+          if [ -z $find_commit_res ]; then echo "could not find GIT VERSION COMMIT"; exit 1; fi;
+          echo "git - commit: $find_commit_res"
+          merge_commit=`echo "$find_commit_res" | cut -d' ' -f1 | cut -d'/' -f2`
+          merge_user=`echo "$find_commit_res" | cut -d"'" -f2 | cut -d'/' -f1`
+          merge_email=`echo "$find_commit_res" | cut -d"'" -f2 | cut -d'/' -f2`
+          git config user.name "$merge_user"
+          git config user.email "$merge_email"
+          git tag -a "${{ steps.cargo_version.outputs.version }}" $merge_commit -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
           git push origin ${{ steps.cargo_version.outputs.version }}
           git checkout ${{ steps.cargo_version.outputs.version }}
           
@@ -65,7 +77,7 @@ jobs:
         id: build_release
         if: steps.git_tag.outputs.exists == 0
         run: | 
-          cargo build --release --verbose 
+          cargo build --release --verbose           
           tar -C target/release/ -czf text-sanitizer_${{ steps.cargo_version.outputs.version }}.tar.gz text-sanitizer
           
       - name: Create Release
