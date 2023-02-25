@@ -829,13 +829,13 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
 ///    // Test data is the Sparkle Heart from the UTF-8 documentation examples.
 ///    // It will be sanitized into the ASCII Characters " <3 "
 ///
-///    use text_sanitizer::sanitizer::sanitize_u8;
+///    use text_sanitizer::sanitizer::{sanitize_string, sanitize_u8};
 ///
 ///    let vsparkle_heart = vec![240, 159, 146, 150];
 ///
 ///    let vrqlngs: Vec<String> = vec![String::from("en")];
 ///
-///    let srsout = match str::from_utf8(&vsparkle_heart) {
+///    let srsout = match std::str::from_utf8(&vsparkle_heart) {
 ///         Ok(s) => sanitize_string(s.to_string(), &vrqlngs, &""),
 ///         Err(_) => sanitize_u8(&vsparkle_heart, &vrqlngs, &""),
 ///    };
