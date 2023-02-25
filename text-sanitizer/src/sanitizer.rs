@@ -1,7 +1,7 @@
 #![allow(unused)]
 /*
 * @author Bodo (Hugo) Barwich
-* @version 2023-02-04
+* @version 2023-02-25
 * @package text-sanitizer
 * @subpackage sanitizer.rs
 
@@ -26,6 +26,9 @@ pub struct LanguageMap(HashMap<String, String>);
 
 //==============================================================================
 // Structure TextSanitizer Declaration
+
+/// Structure that holds reusable data as the "_ConversionMap_", the Vector
+/// of applied Language Replacement Maps and runtime options like verbosity.
 
 #[derive(Default, Debug)]
 pub struct TextSanitizer {
@@ -141,6 +144,23 @@ impl TextSanitizer {
      * Administration Methods
      */
 
+    /// This enables quiet execution.\
+    /// This will not print any warnings only the result data.
+    ///
+    /// # Parameter:
+    ///
+    /// * `bquiet` - don't print any warnings.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object and enable debugging
+    /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.set_quiet(true);
+    /// ```
     pub fn set_quiet(&mut self, bquiet: bool) {
         self._bquiet = bquiet;
     }
@@ -792,6 +812,38 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
     sanitizer.sanitize_u8(text)
 }
 
+/// Sanitizes the given `std::str::String` to a simplified version with ASCII characters.
+///
+/// # Parameters:
+///
+/// * `text` - String of text to sanitize
+/// * `vrqlanguages` - Vector of language references. Currently only 'en', 'es' and 'de'
+/// are recognized.
+/// * `options` - reference to a string. Like command line arguments '-b', '-q' and '-d' and '-v'
+/// are recognized.
+///
+/// # Examples:
+///
+/// ```
+///    //-------------------------------------
+///    // Test data is the Sparkle Heart from the UTF-8 documentation examples.
+///    // It will be sanitized into the ASCII Characters " <3 "
+///
+///    use text_sanitizer::sanitizer::{sanitize_string, sanitize_u8};
+///
+///    let vsparkle_heart = vec![240, 159, 146, 150];
+///
+///    let vrqlngs: Vec<String> = vec![String::from("en")];
+///
+///    let srsout = match std::str::from_utf8(&vsparkle_heart) {
+///         Ok(s) => sanitize_string(s.to_string(), &vrqlngs, &""),
+///         Err(_) => sanitize_u8(&vsparkle_heart, &vrqlngs, &""),
+///    };
+///
+///    println!("sparkle_heart: '{}'", srsout);
+///
+///    assert_eq!(srsout, "<3");
+/// ```
 pub fn sanitize_string(text: String, vrqlanguages: &Vec<String>, options: &str) -> String {
     let mut sanitizer = TextSanitizer::new_with_options_string(options);
 
