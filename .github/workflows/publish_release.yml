@@ -38,6 +38,7 @@ jobs:
         run: |
           cargo_version_res=`scripts/cargo_version.py text-sanitizer | grep -i "text-sanitizer"`
           if [ -z $cargo_version_res ]; then echo "could not find CARGO VERSION"; exit 1; fi;
+          echo "cargo version: '$cargo_version_res'"
           cargo_version=`echo "$cargo_version_res" | cut -d"=" -f2 | cut -d"@" -f1`
           version_commit=`echo "$cargo_version_res" | cut -d"=" -f2 | cut -d"@" -f2`
           version_tag="v$cargo_version"          
@@ -61,7 +62,7 @@ jobs:
         if: steps.git_tag.outputs.exists == 0
         run: |
           echo "git - tag: '${{ steps.git_tag.outputs.tag }}'; exists: '${{ steps.git_tag.outputs.exists }}'"
-          find_commit_res=`scripts/find_version_commit.py ${{ steps.cargo_version.outputs.version_commit }}"`
+          find_commit_res=`scripts/find_version_commit.py "${{ steps.cargo_version.outputs.version_commit }}"`
           if [ -z $find_commit_res ]; then echo "could not find GIT VERSION COMMIT"; exit 1; fi;
           echo "git - commit: $find_commit_res"
           merge_commit=`echo "$find_commit_res" | cut -d' ' -f1 | cut -d'/' -f2`
