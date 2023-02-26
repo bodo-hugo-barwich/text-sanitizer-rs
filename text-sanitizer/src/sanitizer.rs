@@ -1,7 +1,7 @@
 #![allow(unused)]
 /*
 * @author Bodo (Hugo) Barwich
-* @version 2023-02-25
+* @version 2023-02-26
 * @package text-sanitizer
 * @subpackage sanitizer.rs
 
@@ -27,8 +27,8 @@ pub struct LanguageMap(HashMap<String, String>);
 //==============================================================================
 // Structure TextSanitizer Declaration
 
-/// Structure that holds reusable data as the "_ConversionMap_", the Vector
-/// of applied Language Replacement Maps and runtime options like verbosity.
+/// Structure that holds reusable data as the "_ConversionMap_", the vector
+/// of Language Replacement Maps to be applied and runtime options like verbosity.
 
 #[derive(Default, Debug)]
 pub struct TextSanitizer {
@@ -47,6 +47,23 @@ impl TextSanitizer {
      * Constructors
      */
 
+    /// The Default Constructor with default runtime options.
+    ///
+    /// # Default Options:
+    ///
+    /// * `bquiet = false` - do print warnings and errors.
+    /// * `bdebug = false` - do not print detailed activity messages.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object with default settings
+    /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.add_request_language(&"en");
+    /// ```
     pub fn new() -> TextSanitizer {
         let mut sanitizer = TextSanitizer {
             _conv_map: HashMap::new(),
@@ -165,7 +182,7 @@ impl TextSanitizer {
         self._bquiet = bquiet;
     }
 
-    /// This enables very verbose activity reports.\
+    /// This method enables very verbose activity reports.\
     /// This is mostly useful to troubleshoot raw data input and character conversions
     ///
     /// # Parameter:
@@ -190,6 +207,25 @@ impl TextSanitizer {
         self._bprofiling = bprofiling;
     }
 
+    /// This method parses the runtime options from their string presentation.\
+    /// This is used for backward compatibility with the Procedural Interface.
+    ///
+    /// # Parameter:
+    ///
+    /// * `options` - string representation of the runtime options.\
+    ///   *  ` q | b ` - do not print warings.
+    ///   *  ` d | v ` - print detailed activity information.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object and enable debugging
+    /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.set_options_from_string(&"-d -q");
+    /// ```
     pub fn set_options_from_string(&mut self, options: &str) {
         //-------------------------------------
         // Parse the Function Options
@@ -740,7 +776,37 @@ impl TextSanitizer {
         srstxt
     }
 
-    pub fn sanitize_string(&self, text: String) -> String {
+    /// Creates from a given string slice a simplified version with ASCII characters.
+    ///
+    /// # Parameters:
+    ///
+    /// * `text` - String slice of text to sanitize
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    ///    //-------------------------------------
+    ///    // Test data is the Sparkle Heart from the UTF-8 documentation examples.
+    ///    // It will be sanitized into the ASCII Characters " <3 "
+    ///
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let vsparkle_heart = vec![240, 159, 146, 150];
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.add_request_language(&"en");
+    ///
+    ///    let srsout = match std::str::from_utf8(&vsparkle_heart) {
+    ///         Ok(s) => sanitizer.sanitize_string(s),
+    ///         Err(_) => sanitizer.sanitize_u8(&vsparkle_heart),
+    ///    };
+    ///
+    ///    println!("sparkle_heart: '{}'", srsout);
+    ///
+    ///    assert_eq!(srsout, "<3");
+    /// ```
+    pub fn sanitize_string(&self, text: &str) -> String {
         self.sanitize_u8(text.as_bytes())
     }
 
@@ -812,7 +878,7 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
     sanitizer.sanitize_u8(text)
 }
 
-/// Sanitizes the given `std::str::String` to a simplified version with ASCII characters.
+/// Creates from a given string slice a simplified version with ASCII characters.
 ///
 /// # Parameters:
 ///
@@ -836,7 +902,7 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
 ///    let vrqlngs: Vec<String> = vec![String::from("en")];
 ///
 ///    let srsout = match std::str::from_utf8(&vsparkle_heart) {
-///         Ok(s) => sanitize_string(s.to_string(), &vrqlngs, &""),
+///         Ok(s) => sanitize_string(s, &vrqlngs, &""),
 ///         Err(_) => sanitize_u8(&vsparkle_heart, &vrqlngs, &""),
 ///    };
 ///
@@ -844,7 +910,7 @@ pub fn sanitize_u8(text: &[u8], vrqlanguages: &Vec<String>, options: &str) -> St
 ///
 ///    assert_eq!(srsout, "<3");
 /// ```
-pub fn sanitize_string(text: String, vrqlanguages: &Vec<String>, options: &str) -> String {
+pub fn sanitize_string(text: &str, vrqlanguages: &Vec<String>, options: &str) -> String {
     let mut sanitizer = TextSanitizer::new_with_options_string(options);
 
     for srqlang in vrqlanguages {
@@ -881,6 +947,23 @@ fn proc_sparkle_heart() {
 }
 
 #[test]
+fn proc_sparkle_heart_string() {
+    //-------------------------------------
+    // Test data is the Sparkle Heart from the UTF-8 documentation examples
+
+    let vsparkle_heart = vec![240, 159, 146, 150];
+
+    let vrqlngs: Vec<String> = vec![String::from("en")];
+
+    let srsout = sanitize_string(str::from_utf8(&vsparkle_heart).unwrap()
+      , &vrqlngs, &"-d");
+
+    println!("sparkle_heart: '{}'", srsout);
+
+    assert_eq!(srsout, "<3");
+}
+
+#[test]
 fn sanitizer_sparkle_heart() {
     //-------------------------------------
     // Test data is the Sparkle Heart from the UTF-8 documentation examples
@@ -892,6 +975,24 @@ fn sanitizer_sparkle_heart() {
     sanitizer.add_request_language(&"en");
 
     let srsout = sanitizer.sanitize_u8(&vsparkle_heart);
+
+    println!("sparkle_heart: '{}'", srsout);
+
+    assert_eq!(srsout, "<3");
+}
+
+#[test]
+fn sanitizer_sparkle_heart_string() {
+    //-------------------------------------
+    // Test data is the Sparkle Heart from the UTF-8 documentation examples
+
+    let vsparkle_heart = vec![240, 159, 146, 150];
+
+    let mut sanitizer = TextSanitizer::new_with_options(false, true, false);
+
+    sanitizer.add_request_language(&"en");
+
+    let srsout = sanitizer.sanitize_string(str::from_utf8(&vsparkle_heart).unwrap());
 
     println!("sparkle_heart: '{}'", srsout);
 
