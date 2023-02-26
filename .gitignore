@@ -1,11 +1,17 @@
 #Exclude Project Files
 .project
+.pydevproject
 Cargo.lock
 textsanitizer_rs
 textsanitizer_rs/*
+*.tdy
+*.save
 
 #Exclude Build Files
 target
 target/**
 */target
 */target/**
+
+#Exclude Runtime Logs
+*.log

@@ -1,0 +1,118 @@
+name: Publish new Release
+
+# only trigger on pull request closed events
+on:
+  pull_request:
+    types: 
+      - closed
+  workflow_dispatch:
+    branches:    
+      - master  
+
+jobs:
+  publish_release:
+    # this job will only run if the PR has been merged
+    if: (github.event.pull_request.merged == true) || (github.event_name == 'workflow_dispatch') 
+    runs-on: ubuntu-20.04
+    # Docker Hub image that `publish_release` executes in
+    # This will compile the release binary for Ubuntu Xenial
+    # container: ubuntu:xenial
+    
+    steps:
+      - name: Check the Pull Request 
+        if: github.event.pull_request != null 
+        run: echo "Event '${{ github.event_name }}' - PR ${{ github.event.pull_request.number }} has been merged"
+      
+      - name: Check for Manual Launch 
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "Event '${{ github.event_name }}' - Manual Push to Registry" 
+
+      - name: Install Python Dependencies
+        run: | 
+          python3 --version
+          sudo apt-get update && sudo apt-get -y install git python3-toml python3-git
+        
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+          
+      - name: Cargo Version for text-sanitizer
+        id: cargo_version
+        run: |
+          cargo_version_res=`scripts/cargo_version.py text-sanitizer`
+          echo -e "$cargo_version_res"
+          cargo_version_res=`echo "$cargo_version_res" | grep -i "text-sanitizer"`
+          if [ -z "$cargo_version_res" ]; then echo "could not find CARGO VERSION"; exit 1; fi;
+          cargo_version=`echo "$cargo_version_res" | cut -d"=" -f2 | cut -d"@" -f1`
+          version_commit=`echo "$cargo_version_res" | cut -d"=" -f2 | cut -d"@" -f2`
+          version_tag="v$cargo_version"          
+          version_filename=`echo "$version_tag" | tr '.' '-'`
+          echo "version=$version_tag" >> $GITHUB_OUTPUT
+          echo "version_commit=$version_commit" >> $GITHUB_OUTPUT
+          echo "version_filename=$version_filename" >> $GITHUB_OUTPUT
+          
+      - name: Check Repository for Cargo Version Tag
+        id: git_tag
+        run: |
+          git fetch --tags
+          tag_label=`git tag -l "${{ steps.cargo_version.outputs.version }}"`
+          if [ -z $tag_label ]; then tag_exists=0; else tag_exists=1; fi;
+          echo "git - tag: '$tag_label'; exists: '$tag_exists'"
+          echo "tag=$tag_label" >> $GITHUB_OUTPUT
+          echo "exists=$tag_exists" >> $GITHUB_OUTPUT
+        
+      - name: Tag the Repository with Cargo Version Tag
+        id: git_tag_set
+        if: steps.git_tag.outputs.exists == 0
+        run: |
+          echo "git - tag: '${{ steps.git_tag.outputs.tag }}'; exists: '${{ steps.git_tag.outputs.exists }}'"
+          echo "git - commit: '${{ steps.cargo_version.outputs.version_commit }}'"
+          find_commit_res=`scripts/find_version_commit.py "${{ steps.cargo_version.outputs.version_commit }}"`
+          echo -e "$find_commit_res"
+          find_commit_res=`echo "$find_commit_res" | grep -i " by "`
+          if [ -z "$find_commit_res" ]; then echo "could not find GIT VERSION COMMIT"; exit 1; fi;
+          merge_commit=`echo "$find_commit_res" | cut -d' ' -f1 | cut -d'/' -f2`
+          merge_user=`echo "$find_commit_res" | cut -d"'" -f2 | cut -d'/' -f1`
+          merge_email=`echo "$find_commit_res" | cut -d"'" -f2 | cut -d'/' -f2`
+          git config user.name "$merge_user"
+          git config user.email "$merge_email"
+          git tag -a "${{ steps.cargo_version.outputs.version }}" $merge_commit -m "text-sanitizer ${{ steps.cargo_version.outputs.version }} released"
+          git push origin ${{ steps.cargo_version.outputs.version }}
+          git fetch --tags
+          git checkout ${{ steps.cargo_version.outputs.version }}
+          
+      - name: Build Release Version
+        id: build_release
+        if: steps.git_tag.outputs.exists == 0
+        run: | 
+          cargo build --release --verbose           
+          tar -C target/release/ -czf text-sanitizer_${{ steps.cargo_version.outputs.version_filename }}.tar.gz text-sanitizer
+          
+      - name: Create Release
+        id: release
+        if: steps.git_tag.outputs.exists == 0
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.cargo_version.outputs.version }}
+          token: ${{ secrets.PROJECT_RELEASE_TOKEN }}
+          files: text-sanitizer_${{ steps.cargo_version.outputs.version_filename }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECT_RELEASE_TOKEN }}       
+                      
+      - name: Crates.io Publish
+        id: publish
+        if: steps.git_tag.outputs.exists == 0
+        run: |
+          cd text-sanitizer
+          cargo publish --verbose 2>cargo-publish_error.log > cargo-publish.log ; echo "Exit Code: '$?'" >> cargo-publish.log || true
+          publish_res=$?
+          duplicated=`cat cargo-publish_error.log | grep -i "already uploaded" | wc -l`
+          echo "Crates.io Publishing Report:"
+          cat cargo-publish.log
+          echo "Crates.io Publishing Error:"
+          cat cargo-publish_error.log
+          if [ $duplicated -ne 1 ]; then exit $publish_res ; fi;
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_PUBLISH_TOKEN }}       
+          
+        
