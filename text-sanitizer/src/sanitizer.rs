@@ -27,7 +27,7 @@ pub struct LanguageMap(HashMap<String, String>);
 //==============================================================================
 // Structure TextSanitizer Declaration
 
-/// Structure that holds reusable data as the "_ConversionMap_", the Vector
+/// Structure that holds reusable data as the "_ConversionMap_", the Vvector
 /// of applied Language Replacement Maps and runtime options like verbosity.
 
 #[derive(Default, Debug)]
@@ -47,6 +47,23 @@ impl TextSanitizer {
      * Constructors
      */
 
+    /// The Default Constructor with default runtime options.
+    ///
+    /// # Default Options:
+    ///
+    /// * `bquiet = false` - do print warnings and errors.
+    /// * `bdebug = false` - do not print detailed activity messages.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object with default settings
+    /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.add_request_language(&"en");
+    /// ```
     pub fn new() -> TextSanitizer {
         let mut sanitizer = TextSanitizer {
             _conv_map: HashMap::new(),

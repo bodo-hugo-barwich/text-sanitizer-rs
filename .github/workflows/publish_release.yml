@@ -42,7 +42,7 @@ jobs:
           cargo_version_res=`scripts/cargo_version.py text-sanitizer`
           echo -e "$cargo_version_res"
           cargo_version_res=`echo "$cargo_version_res" | grep -i "text-sanitizer"`
-          if [ -z $cargo_version_res ]; then echo "could not find CARGO VERSION"; exit 1; fi;
+          if [ -z "$cargo_version_res" ]; then echo "could not find CARGO VERSION"; exit 1; fi;
           cargo_version=`echo "$cargo_version_res" | cut -d"=" -f2 | cut -d"@" -f1`
           version_commit=`echo "$cargo_version_res" | cut -d"=" -f2 | cut -d"@" -f2`
           version_tag="v$cargo_version"          
@@ -70,7 +70,7 @@ jobs:
           find_commit_res=`scripts/find_version_commit.py "${{ steps.cargo_version.outputs.version_commit }}"`
           echo -e "$find_commit_res"
           find_commit_res=`echo "$find_commit_res" | grep -i " by "`
-          if [ -z $find_commit_res ]; then echo "could not find GIT VERSION COMMIT"; exit 1; fi;
+          if [ -z "$find_commit_res" ]; then echo "could not find GIT VERSION COMMIT"; exit 1; fi;
           merge_commit=`echo "$find_commit_res" | cut -d' ' -f1 | cut -d'/' -f2`
           merge_user=`echo "$find_commit_res" | cut -d"'" -f2 | cut -d'/' -f1`
           merge_email=`echo "$find_commit_res" | cut -d"'" -f2 | cut -d'/' -f2`
