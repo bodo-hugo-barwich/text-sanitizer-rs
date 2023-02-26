@@ -182,7 +182,7 @@ impl TextSanitizer {
         self._bquiet = bquiet;
     }
 
-    /// This enables very verbose activity reports.\
+    /// This method enables very verbose activity reports.\
     /// This is mostly useful to troubleshoot raw data input and character conversions
     ///
     /// # Parameter:
@@ -207,6 +207,25 @@ impl TextSanitizer {
         self._bprofiling = bprofiling;
     }
 
+    /// This method parses the runtime options from their string presentation.\
+    /// This is used for backward compatibility with the Procedural Interface.
+    ///
+    /// # Parameter:
+    ///
+    /// * `options` - string representation of the runtime options.\
+    ///   *  ` q | b ` - do not print warings.
+    ///   *  ` d | v ` - print detailed activity information.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object and enable debugging
+    /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.set_options_from_string(&"-d -q");
+    /// ```
     pub fn set_options_from_string(&mut self, options: &str) {
         //-------------------------------------
         // Parse the Function Options
