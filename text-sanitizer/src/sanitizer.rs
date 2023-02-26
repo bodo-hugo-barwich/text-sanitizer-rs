@@ -80,6 +80,47 @@ impl TextSanitizer {
         sanitizer
     }
 
+    /// This Constructor allows to set a custom `ConversionMap` at buildtime.
+    /// This will not create the Default `ConversionMap`.
+    ///
+    /// # Default Options:
+    ///
+    /// * `bquiet = false` - do print warnings and errors.
+    /// * `bdebug = false` - do not print detailed activity messages.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object with custom `ConversionMap`
+    /// ```
+    ///    use text_sanitizer::{TextSanitizer, ConversionMap, LanguageMap};
+    ///
+    ///    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    ///    let mut lang_map = LanguageMap(HashMap::with_capacity(4));
+    ///
+    ///    lang_map.0.insert("d".to_string(), "".to_string());
+    ///    lang_map.0.insert("1b".to_string(), "".to_string());
+    ///    lang_map.0.insert("80".to_string(), "EUR".to_string());
+    ///    lang_map.0.insert("20ac".to_string(), "EUR".to_string());
+    ///
+    ///    conv_map.0.insert("custom".to_string(), lang_map);
+    ///
+    ///    let mut sanitizer = TextSanitizer::new_with_conversion_map(conv_map);
+    ///
+    ///    sanitizer.add_request_language(&"custom");
+    /// ```
+    pub fn new_with_conversion_map(conversion_map: ConversionMap) -> TextSanitizer {
+        let mut sanitizer = TextSanitizer {
+            _oconv_map: Some(conversion_map),
+            _vrqlangs: Vec::new(),
+            _bquiet: false,
+            _bdebug: false,
+            _bprofiling: false,
+        };
+
+        //Return the New TextSanitizer Object
+        sanitizer
+    }
+
     /// This Constructor already sets the most used runtime options.
     ///
     /// # Parameters:
@@ -252,8 +293,65 @@ impl TextSanitizer {
         } //if(!options.is_empty())
     }
 
+    /// This method allows to replace the default `ConversionMap` with a custom one.
+    ///
+    /// # Example:
+    ///
+    /// Set a custom `ConversionMap`
+    /// ```
+    ///    use text_sanitizer::{TextSanitizer, ConversionMap, LanguageMap};
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    ///    let mut lang_map = LanguageMap(HashMap::with_capacity(4));
+    ///
+    ///    lang_map.0.insert("d".to_string(), "".to_string());
+    ///    lang_map.0.insert("1b".to_string(), "".to_string());
+    ///    lang_map.0.insert("80".to_string(), "EUR".to_string());
+    ///    lang_map.0.insert("20ac".to_string(), "EUR".to_string());
+    ///
+    ///    conv_map.0.insert("custom".to_string(), lang_map);
+    ///
+    ///    sanitizer.set_conversion_map(conv_map);
+    ///
+    ///    sanitizer.add_request_language(&"custom");
+    /// ```
     pub fn set_conversion_map(&mut self, conversion_map: ConversionMap) {
         self._oconv_map = Some(conversion_map);
+    }
+
+    /// This method allows to add a custom `LanguageMap` to the default `ConversionMap`.
+    ///
+    /// # Example:
+    ///
+    /// Add a custom `LanguageMap`
+    /// ```
+    ///    use text_sanitizer::{TextSanitizer, LanguageMap};
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    let mut lang_map = LanguageMap(HashMap::with_capacity(4));
+    ///
+    ///    lang_map.0.insert("d".to_string(), "".to_string());
+    ///    lang_map.0.insert("1b".to_string(), "".to_string());
+    ///    lang_map.0.insert("80".to_string(), "EUR".to_string());
+    ///    lang_map.0.insert("20ac".to_string(), "EUR".to_string());
+    ///
+    ///    conv_map.0.insert("custom".to_string(), lang_map);
+    ///
+    ///    sanitizer.set_language_map(&"custom", lang_map);
+    ///
+    ///    sanitizer.add_request_language(&"custom");
+    /// ```
+    pub fn set_language_map(&mut self, language: &str, language_map: LanguageMap) {
+        if self._oconv_map.is_none() {
+            self._oconv_map = Some(ConversionMap(HashMap::new()));
+        }
+
+        if let Some(map) = self._oconv_map {
+            map.0.insert(language.to_string(), language_map);
+        }
     }
 
     /// Adds a Language Shortcode to the Vector of applied Language Replacement Maps.\
@@ -262,7 +360,7 @@ impl TextSanitizer {
     ///
     /// # Parameters:
     ///
-    /// * `slanguage` - language shortcode. Currently only 'en', 'es' and 'de'
+    /// * `language` - language shortcode. By default only 'en', 'es' and 'de'
     /// are recognized.
     ///
     /// # Examples:
@@ -280,8 +378,8 @@ impl TextSanitizer {
     ///
     ///    sanitizer.add_request_language(&"en");
     /// ```
-    pub fn add_request_language(&mut self, slanguage: &str) {
-        let slang = String::from(slanguage);
+    pub fn add_request_language(&mut self, language: &str) {
+        let slang = String::from(language);
 
         if !self._vrqlangs.contains(&slang) {
             self._vrqlangs.push(slang);
