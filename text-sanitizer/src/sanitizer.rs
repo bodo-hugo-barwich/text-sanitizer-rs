@@ -9,12 +9,14 @@
 *
 *---------------------------------
 * Requirements:
+* - serde
 */
+
+extern crate serde;
 
 use std::collections::HashMap;
 use std::str;
 
-/*
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -22,14 +24,13 @@ pub struct ConversionMap(HashMap<String, LanguageMap>);
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct LanguageMap(HashMap<String, String>);
-*/
 
 //==============================================================================
 // Structure TextSanitizer Declaration
 
 #[derive(Default, Debug)]
 pub struct TextSanitizer {
-    _conv_map: HashMap<String, HashMap<String, String>>,
+    _oconv_map: Option<ConversionMap>,
     _vrqlangs: Vec<String>,
     _bquiet: bool,
     _bdebug: bool,
@@ -46,7 +47,7 @@ impl TextSanitizer {
 
     pub fn new() -> TextSanitizer {
         let mut sanitizer = TextSanitizer {
-            _conv_map: HashMap::new(),
+            _oconv_map: None,
             _vrqlangs: Vec::new(),
             _bquiet: false,
             _bdebug: false,
@@ -61,7 +62,7 @@ impl TextSanitizer {
 
     pub fn new_with_options(bquiet: bool, bdebug: bool, bprofiling: bool) -> TextSanitizer {
         let mut sanitizer = TextSanitizer {
-            _conv_map: HashMap::new(),
+            _oconv_map: None,
             _vrqlangs: Vec::new(),
             _bquiet: bquiet,
             _bdebug: bdebug,
@@ -105,7 +106,7 @@ impl TextSanitizer {
         // Create the TextSanitizer Object
 
         let mut sanitizer = TextSanitizer {
-            _conv_map: HashMap::new(),
+            _oconv_map: None,
             _vrqlangs: Vec::new(),
             _bquiet: bqt,
             _bdebug: bdbg,
@@ -157,6 +158,10 @@ impl TextSanitizer {
                 }
             } //for mut prm in options.split_whitespace() {
         } //if(!options.is_empty())
+    }
+
+    pub fn set_conversion_map(&mut self, conversion_map: ConversionMap) {
+        self._oconv_map = Some(conversion_map);
     }
 
     /// Adds a Language Shortcode to the Vector of applied Language Replacement Maps.\
@@ -219,43 +224,52 @@ impl TextSanitizer {
     }
 
     fn init(&mut self) {
-        let mut lngrplmap: HashMap<String, String> = HashMap::with_capacity(12);
+        self._oconv_map = Some(ConversionMap(HashMap::with_capacity(3)));
 
-        lngrplmap.insert("d".to_string(), "".to_string());
-        lngrplmap.insert("1b".to_string(), "".to_string());
-        lngrplmap.insert("bb".to_string(), "\"".to_string());
-        lngrplmap.insert("ab".to_string(), "\"".to_string());
-        lngrplmap.insert("80".to_string(), "EUR".to_string());
-        lngrplmap.insert("20ac".to_string(), "EUR".to_string());
-        lngrplmap.insert("25cf".to_string(), "*".to_string());
-        lngrplmap.insert("251c".to_string(), "|-".to_string());
-        lngrplmap.insert("2514".to_string(), "|-".to_string());
-        lngrplmap.insert("2500".to_string(), "-".to_string());
-        lngrplmap.insert("2764".to_string(), "<3".to_string());
-        lngrplmap.insert("1f496".to_string(), "<3".to_string());
+        let mut lngrplmap = LanguageMap(HashMap::with_capacity(12));
 
-        self._conv_map.insert("en".to_string(), lngrplmap);
+        lngrplmap.0.insert("d".to_string(), "".to_string());
+        lngrplmap.0.insert("1b".to_string(), "".to_string());
+        lngrplmap.0.insert("bb".to_string(), "\"".to_string());
+        lngrplmap.0.insert("ab".to_string(), "\"".to_string());
+        lngrplmap.0.insert("80".to_string(), "EUR".to_string());
+        lngrplmap.0.insert("20ac".to_string(), "EUR".to_string());
+        lngrplmap.0.insert("25cf".to_string(), "*".to_string());
+        lngrplmap.0.insert("251c".to_string(), "|-".to_string());
+        lngrplmap.0.insert("2514".to_string(), "|-".to_string());
+        lngrplmap.0.insert("2500".to_string(), "-".to_string());
+        lngrplmap.0.insert("2764".to_string(), "<3".to_string());
+        lngrplmap.0.insert("1f496".to_string(), "<3".to_string());
 
-        let mut lngrplmap: HashMap<String, String> = HashMap::with_capacity(5);
+        if let Some(conv_map) = self._oconv_map {
+            conv_map.0.insert("en".to_string(), lngrplmap);
+        }
 
-        lngrplmap.insert("df".to_string(), "ss".to_string());
-        lngrplmap.insert("dc".to_string(), "Ue".to_string());
-        lngrplmap.insert("e4".to_string(), "ae".to_string());
-        lngrplmap.insert("fc".to_string(), "ue".to_string());
-        lngrplmap.insert("f6".to_string(), "oe".to_string());
+        let mut lngrplmap = LanguageMap(HashMap::with_capacity(5));
 
-        self._conv_map.insert("de".to_string(), lngrplmap);
+        lngrplmap.0.insert("df".to_string(), "ss".to_string());
+        lngrplmap.0.insert("dc".to_string(), "Ue".to_string());
+        lngrplmap.0.insert("e4".to_string(), "ae".to_string());
+        lngrplmap.0.insert("fc".to_string(), "ue".to_string());
+        lngrplmap.0.insert("f6".to_string(), "oe".to_string());
 
-        let mut lngrplmap: HashMap<String, String> = HashMap::with_capacity(6);
+        if let Some(conv_map) = self._oconv_map {
+            conv_map.0.insert("de".to_string(), lngrplmap);
+        }
 
-        lngrplmap.insert("d3".to_string(), "O".to_string());
-        lngrplmap.insert("e1".to_string(), "a".to_string());
-        lngrplmap.insert("e9".to_string(), "e".to_string());
-        lngrplmap.insert("ed".to_string(), "i".to_string());
-        lngrplmap.insert("f1".to_string(), "n".to_string());
-        lngrplmap.insert("f3".to_string(), "o".to_string());
+        let mut lngrplmap = LanguageMap(HashMap::with_capacity(6));
 
-        self._conv_map.insert("es".to_string(), lngrplmap);
+        lngrplmap.0.insert("d3".to_string(), "O".to_string());
+        lngrplmap.0.insert("e1".to_string(), "a".to_string());
+        lngrplmap.0.insert("e9".to_string(), "e".to_string());
+        lngrplmap.0.insert("ed".to_string(), "i".to_string());
+        lngrplmap.0.insert("f1".to_string(), "n".to_string());
+        lngrplmap.0.insert("f3".to_string(), "o".to_string());
+
+        if let Some(conv_map) = self._oconv_map {
+            conv_map.0.insert("es".to_string(), lngrplmap);
+        }
+
     }
 
     #[doc(hidden)]
@@ -500,187 +514,191 @@ impl TextSanitizer {
             println!("vtext 0:'{:?}'", text);
         }
 
-        let mut srstxt = String::with_capacity(text.len());
-        let mut srptchrs = String::new();
-        let mut orpl = None;
-        let mut ic: usize = 0;
-        let mut icstrt: Option<usize> = None;
-        let mut icend: Option<usize> = None;
+        if let Some(conv_map) = self._oconv_map {
+            let mut srstxt = String::with_capacity(text.len());
+            let mut srptchrs = String::new();
+            let mut orpl = None;
+            let mut ic: usize = 0;
+            let mut icstrt: Option<usize> = None;
+            let mut icend: Option<usize> = None;
 
-        for uc in text {
-            if (self._bdebug && !self._bquiet) {
-                srptchrs.push_str(&format!("; {} - {}:'{}'", ic, uc, char::from(*uc)));
-            }
+            for uc in text {
+                if (self._bdebug && !self._bquiet) {
+                    srptchrs.push_str(&format!("; {} - {}:'{}'", ic, uc, char::from(*uc)));
+                }
 
-            if (*uc >= 32 as u8 && *uc < 127 as u8) || (*uc == 10 as u8) || (*uc == 9 as u8) {
-                //------------------------
-                //Valid ASCII Character
-
-                //srptchrs.push_str(" - ascii");
-
-                if icstrt.is_some() {
+                if (*uc >= 32 as u8 && *uc < 127 as u8) || (*uc == 10 as u8) || (*uc == 9 as u8) {
                     //------------------------
-                    //Pending Non ASCII Characters
+                    //Valid ASCII Character
 
-                    icend = Some(ic);
+                    //srptchrs.push_str(" - ascii");
 
-                    if (self._bdebug && !self._bquiet) {
-                        println!(
-                            "pdg spec chars '{} - {}': '{:?}'",
-                            icstrt.unwrap(),
-                            icend.unwrap(),
-                            &text[icstrt.unwrap()..icend.unwrap()]
-                        );
-                    }
+                    if icstrt.is_some() {
+                        //------------------------
+                        //Pending Non ASCII Characters
 
-                    //Parse the slice of Non ASCII Characters
-                    let vuni = self.parse_unicode(&text[icstrt.unwrap()..icend.unwrap()]);
+                        icend = Some(ic);
 
-                    if (self._bdebug && !self._bquiet) {
-                        print!("= {:?}", vuni);
-                    }
+                        if (self._bdebug && !self._bquiet) {
+                            println!(
+                                "pdg spec chars '{} - {}': '{:?}'",
+                                icstrt.unwrap(),
+                                icend.unwrap(),
+                                &text[icstrt.unwrap()..icend.unwrap()]
+                            );
+                        }
 
-                    for suni in vuni {
-                        orpl = None;
+                        //Parse the slice of Non ASCII Characters
+                        let vuni = self.parse_unicode(&text[icstrt.unwrap()..icend.unwrap()]);
 
-                        for slng in &self._vrqlangs {
-                            if orpl.is_none() {
-                                olngrplmap = self._conv_map.get(slng.as_str());
+                        if (self._bdebug && !self._bquiet) {
+                            print!("= {:?}", vuni);
+                        }
 
-                                if let Some(lngmap) = olngrplmap {
-                                    orpl = lngmap.get(suni.as_str());
+                        for suni in vuni {
+                            orpl = None;
+
+                            for slng in &self._vrqlangs {
+                                if orpl.is_none() {
+                                    olngrplmap = conv_map.0.get(slng.as_str());
+
+                                    if let Some(lngmap) = olngrplmap {
+                                        orpl = lngmap.0.get(suni.as_str());
+                                    }
+                                } //if orpl.is_none()
+                            } //for slng in vrqlanguages
+
+                            match orpl {
+                                Some(rpl) => {
+                                    srstxt.push_str(rpl);
+
+                                    if (self._bdebug && !self._bquiet) {
+                                        print!(" -> '{}'", rpl);
+                                    }
                                 }
-                            } //if orpl.is_none()
-                        } //for slng in vrqlanguages
+                                None => {
+                                    srstxt.push_str(&format!("(?{})", &suni));
 
-                        match orpl {
-                            Some(rpl) => {
-                                srstxt.push_str(rpl);
+                                    if (self._bdebug && !self._bquiet) {
+                                        print!(" -> '(?{})'", &suni);
+                                    }
+                                } //Some(rpl)
+                            } //match orpl
+                        } //for suni in vuni
 
-                                if (self._bdebug && !self._bquiet) {
-                                    print!(" -> '{}'", rpl);
-                                }
-                            }
-                            None => {
-                                srstxt.push_str(&format!("(?{})", &suni));
+                        if (self._bdebug && !self._bquiet) {
+                            println!("'");
+                        } //if(bdbg && ! bqt)
+                          /**/
 
-                                if (self._bdebug && !self._bquiet) {
-                                    print!(" -> '(?{})'", &suni);
-                                }
-                            } //Some(rpl)
-                        } //match orpl
-                    } //for suni in vuni
+                        icstrt = None;
+                    } //if icstrt.is_some()
 
-                    if (self._bdebug && !self._bquiet) {
-                        println!("'");
-                    } //if(bdbg && ! bqt)
-                      /**/
-
-                    icstrt = None;
-                } //if icstrt.is_some()
-
-                //Add the valid ASCII Character
-                srstxt.push(char::from(*uc));
-            } else {
-                //------------------------
-                //Non ASCII Character
-
-                srptchrs.push_str(&format!(" - non-ascii '{:?}", icstrt));
-
-                if icstrt.is_none() {
-                    icstrt = Some(ic);
-                    //if(bdbg && ! bqt) {
-                    srptchrs.push_str(&format!(" > {:?} - {:?}'|", icstrt, icend));
-                    //}
+                    //Add the valid ASCII Character
+                    srstxt.push(char::from(*uc));
                 } else {
-                    srptchrs.push_str(&format!(" - {:?}'|", icend));
-                } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
-            } //if (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
+                    //------------------------
+                    //Non ASCII Character
 
-            ic += 1;
-        } //for uc in text
+                    srptchrs.push_str(&format!(" - non-ascii '{:?}", icstrt));
 
-        if icstrt.is_some() {
-            icend = Some(ic);
+                    if icstrt.is_none() {
+                        icstrt = Some(ic);
+                        //if(bdbg && ! bqt) {
+                        srptchrs.push_str(&format!(" > {:?} - {:?}'|", icstrt, icend));
+                        //}
+                    } else {
+                        srptchrs.push_str(&format!(" - {:?}'|", icend));
+                    } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
+                } //if (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
+
+                ic += 1;
+            } //for uc in text
+
+            if icstrt.is_some() {
+                icend = Some(ic);
+
+                if (self._bdebug && !self._bquiet) {
+                    print!(
+                        "\nrst spec char '{} - {}': '{:?}",
+                        icstrt.unwrap(),
+                        icend.unwrap(),
+                        &text[icstrt.unwrap()..icend.unwrap()]
+                    );
+                }
+
+                let vuni = self.parse_unicode(&text[icstrt.unwrap()..icend.unwrap()]);
+
+                if (self._bdebug && !self._bquiet) {
+                    print!(" | {:?}", vuni);
+                }
+
+                for suni in vuni {
+                    orpl = None;
+
+                    for slng in &self._vrqlangs {
+                        if orpl.is_none() {
+                            olngrplmap = conv_map.0.get(slng.as_str());
+
+                            if let Some(lngmap) = olngrplmap {
+                                orpl = lngmap.0.get(suni.as_str());
+                            }
+                        } //if orpl.is_none()
+                    } //for slng in vrqlanguages
+
+                    match orpl {
+                        Some(rpl) => {
+                            srstxt.push_str(rpl);
+
+                            if (self._bdebug && !self._bquiet) {
+                                print!(" -> '{}'", rpl);
+                            }
+                        }
+                        None => {
+                            srstxt.push_str(&format!("(?{})", &suni));
+
+                            if (self._bdebug && !self._bquiet) {
+                                print!(" -> '(?{})'", &suni);
+                            }
+                        } //Some(rpl)
+                    } //match orpl
+                } //for suni in vuni
+
+                if (self._bdebug && !self._bquiet) {
+                    print!("'");
+                } //if(bdbg && ! bqt)
+
+                icstrt = None;
+            } //if icstrt.is_some()
 
             if (self._bdebug && !self._bquiet) {
-                print!(
-                    "\nrst spec char '{} - {}': '{:?}",
-                    icstrt.unwrap(),
-                    icend.unwrap(),
-                    &text[icstrt.unwrap()..icend.unwrap()]
-                );
-            }
+                srptchrs.push_str(&format!("; chr cnt '{}'", ic));
 
-            let vuni = self.parse_unicode(&text[icstrt.unwrap()..icend.unwrap()]);
+                println!("; sanitze done.");
+                println!("chrs rpt: '{:?}'", &srptchrs);
 
-            if (self._bdebug && !self._bquiet) {
-                print!(" | {:?}", vuni);
-            }
+                let vsttrpt: Vec<char> = String::from_utf8_lossy(text).to_mut().chars().collect();
 
-            for suni in vuni {
-                orpl = None;
+                println!("stt rpt chrs (count : '{}'):\n{:?}", vsttrpt.len(), vsttrpt);
 
-                for slng in &self._vrqlangs {
-                    if orpl.is_none() {
-                        olngrplmap = self._conv_map.get(slng.as_str());
+                println!("stt chrs ascii:");
 
-                        if let Some(lngmap) = olngrplmap {
-                            orpl = lngmap.get(suni.as_str());
-                        }
-                    } //if orpl.is_none()
-                } //for slng in vrqlanguages
-
-                match orpl {
-                    Some(rpl) => {
-                        srstxt.push_str(rpl);
-
-                        if (self._bdebug && !self._bquiet) {
-                            print!(" -> '{}'", rpl);
-                        }
+                for c in &vsttrpt {
+                    if !c.is_ascii() {
+                        print!("{}|", c.escape_unicode().to_string());
+                    } else {
+                        print!("{}|", c);
                     }
-                    None => {
-                        srstxt.push_str(&format!("(?{})", &suni));
+                } //for c in &vsttrpt
 
-                        if (self._bdebug && !self._bquiet) {
-                            print!(" -> '(?{})'", &suni);
-                        }
-                    } //Some(rpl)
-                } //match orpl
-            } //for suni in vuni
-
-            if (self._bdebug && !self._bquiet) {
-                print!("'");
+                println!();
             } //if(bdbg && ! bqt)
 
-            icstrt = None;
-        } //if icstrt.is_some()
-
-        if (self._bdebug && !self._bquiet) {
-            srptchrs.push_str(&format!("; chr cnt '{}'", ic));
-
-            println!("; sanitze done.");
-            println!("chrs rpt: '{:?}'", &srptchrs);
-
-            let vsttrpt: Vec<char> = String::from_utf8_lossy(text).to_mut().chars().collect();
-
-            println!("stt rpt chrs (count : '{}'):\n{:?}", vsttrpt.len(), vsttrpt);
-
-            println!("stt chrs ascii:");
-
-            for c in &vsttrpt {
-                if !c.is_ascii() {
-                    print!("{}|", c.escape_unicode().to_string());
-                } else {
-                    print!("{}|", c);
-                }
-            } //for c in &vsttrpt
-
-            println!();
-        } //if(bdbg && ! bqt)
-
-        //Return the sanitized String
-        srstxt
+            //Return the sanitized String
+            srstxt
+        } else {
+            String::from_utf8_lossy(text).into_owned()
+        }
     }
 
     pub fn sanitize_string(&self, text: String) -> String {

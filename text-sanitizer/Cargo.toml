@@ -12,3 +12,6 @@ license = "Apache-2.0"
 keywords = ["text-processing", "utf-8", "unicode", "ascii", "sanitizing" ]
 categories = ["text-processing", "parsing"]
 exclude = ["/doc"]
+
+[dependencies]
+serde = "=1.0.106"

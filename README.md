@@ -6,14 +6,16 @@ Rust Application and Library to convert rich UTF-8 Text into plain ASCII Text
 
 This Crate holds a **Library** and an Executable.\
 The **Executable** which can be invoked from **command line** taking the requested Data from the STDIN
-and producing the sanitized output to STDOUT
+and producing the sanitized output to STDOUT.\
+Precompiled **Binaries** are distributed with the Releases in the Release Section:\
+[Download `text-sanitizer` latest](https://github.com/bodo-hugo-barwich/text-sanitizer-rs/releases/tag/lastest)
 
 
 ## Features
 * Very low Dependencies\
   This leads to:
   * High Compability (compiles even with old _Rust_ Compilers)
-  * Very fast Startup Time (Execution Time about **3 - 5 ms**)
+  * Very fast Startup Time (Execution Time less than **3 ms** on a 27KB document)
 * Robust Code (does not use risky `unwrap()` Methods)\
   Developed with the _DevOps_ Mentalitity: "_can fail but will live to tell_"
 
