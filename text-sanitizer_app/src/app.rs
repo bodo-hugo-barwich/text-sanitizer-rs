@@ -35,7 +35,7 @@ struct ConversionMap(HashMap<String, LanguageMap>);
 struct LanguageMap(HashMap<String, String>);
 
 #[allow(unused_variables)]
-fn main() {
+fn from_yaml() -> ConversionMap {
     let conv_map_yaml = "---
 en:
   'd': ''
@@ -45,9 +45,60 @@ de:
   'fc': 'ue'
   'f6': 'oe'
 ";
-     // Deserialize it back to a Rust type.
+    // Deserialize it back to a Rust type.
     let conv_map: ConversionMap = serde_yaml::from_str(&conv_map_yaml).unwrap();
-   println!("conv mp 0 dmp: {:?}", conv_map);
+
+    conv_map
+}
+
+fn init() -> ConversionMap {
+    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    let mut lang_map = LanguageMap(HashMap::with_capacity(4));
+
+    lang_map.0.insert("d".to_string(), "".to_string());
+    lang_map.0.insert("1b".to_string(), "".to_string());
+    lang_map.0.insert("80".to_string(), "EUR".to_string());
+    lang_map.0.insert("20ac".to_string(), "EUR".to_string());
+
+    conv_map.0.insert("en".to_string(), lang_map);
+
+    let mut lngrplmap = LanguageMap(HashMap::with_capacity(5));
+
+    lngrplmap.0.insert("df".to_string(), "ss".to_string());
+    lngrplmap.0.insert("dc".to_string(), "Ue".to_string());
+    lngrplmap.0.insert("e4".to_string(), "ae".to_string());
+    lngrplmap.0.insert("fc".to_string(), "ue".to_string());
+    lngrplmap.0.insert("f6".to_string(), "oe".to_string());
+
+    conv_map.0.insert("de".to_string(), lngrplmap);
+
+    conv_map
+}
+
+fn main() {
+    let conv_map_yaml = from_yaml();
+    let conv_map = init();
+
+    println!("conv map yaml 0 dmp: {:?}", conv_map_yaml);
+    println!("conv map init 0 dmp: {:?}", conv_map);
+
+    match conv_map.0.get("en") {
+        Some(m) => println!("lng map 'en' dmp: {:?}", m),
+        None => println!("lng map 'en' not found!"),
+    }
+    match conv_map.0.get("de") {
+        Some(m) => println!("lng map 'de' dmp: {:?}", m),
+        None => println!("lng map 'de' not found!"),
+    }
+
+    match conv_map_yaml.0.get("en") {
+        Some(m) => println!("lng map 'en' dmp: {:?}", m),
+        None => println!("lng map 'en' not found!"),
+    }
+    match conv_map_yaml.0.get("de") {
+        Some(m) => println!("lng map 'de' dmp: {:?}", m),
+        None => println!("lng map 'de' not found!"),
+    }
 }
 
 */

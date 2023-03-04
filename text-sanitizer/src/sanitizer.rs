@@ -9,20 +9,21 @@
 *
 *---------------------------------
 * Requirements:
+* - serde
 */
+
+extern crate serde;
 
 use std::collections::HashMap;
 use std::str;
 
-/*
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ConversionMap(HashMap<String, LanguageMap>);
+pub struct ConversionMap(pub HashMap<String, LanguageMap>);
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct LanguageMap(HashMap<String, String>);
-*/
+pub struct LanguageMap(pub HashMap<String, String>);
 
 //==============================================================================
 // Structure TextSanitizer Declaration
@@ -32,7 +33,7 @@ pub struct LanguageMap(HashMap<String, String>);
 
 #[derive(Default, Debug)]
 pub struct TextSanitizer {
-    _conv_map: HashMap<String, HashMap<String, String>>,
+    _oconv_map: Option<ConversionMap>,
     _vrqlangs: Vec<String>,
     _bquiet: bool,
     _bdebug: bool,
@@ -66,7 +67,7 @@ impl TextSanitizer {
     /// ```
     pub fn new() -> TextSanitizer {
         let mut sanitizer = TextSanitizer {
-            _conv_map: HashMap::new(),
+            _oconv_map: None,
             _vrqlangs: Vec::new(),
             _bquiet: false,
             _bdebug: false,
@@ -74,6 +75,48 @@ impl TextSanitizer {
         };
 
         sanitizer.init();
+
+        //Return the New TextSanitizer Object
+        sanitizer
+    }
+
+    /// This Constructor allows to set a custom `ConversionMap` at buildtime.
+    /// This will not create the Default `ConversionMap`.
+    ///
+    /// # Default Options:
+    ///
+    /// * `bquiet = false` - do print warnings and errors.
+    /// * `bdebug = false` - do not print detailed activity messages.
+    ///
+    /// # Example:
+    ///
+    /// Create a `TextSanitizer` object with custom `ConversionMap`
+    /// ```
+    ///    use text_sanitizer::{TextSanitizer, ConversionMap, LanguageMap};
+    ///    use std::collections::HashMap;
+    ///
+    ///    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    ///    let mut lang_map = LanguageMap(HashMap::with_capacity(4));
+    ///
+    ///    lang_map.0.insert("d".to_string(), "".to_string());
+    ///    lang_map.0.insert("1b".to_string(), "".to_string());
+    ///    lang_map.0.insert("80".to_string(), "EUR".to_string());
+    ///    lang_map.0.insert("20ac".to_string(), "EUR".to_string());
+    ///
+    ///    conv_map.0.insert("custom".to_string(), lang_map);
+    ///
+    ///    let mut sanitizer = TextSanitizer::new_with_conversion_map(conv_map);
+    ///
+    ///    sanitizer.add_request_language(&"custom");
+    /// ```
+    pub fn new_with_conversion_map(conversion_map: ConversionMap) -> TextSanitizer {
+        let mut sanitizer = TextSanitizer {
+            _oconv_map: Some(conversion_map),
+            _vrqlangs: Vec::new(),
+            _bquiet: false,
+            _bdebug: false,
+            _bprofiling: false,
+        };
 
         //Return the New TextSanitizer Object
         sanitizer
@@ -100,7 +143,7 @@ impl TextSanitizer {
     /// ```
     pub fn new_with_options(bquiet: bool, bdebug: bool, bprofiling: bool) -> TextSanitizer {
         let mut sanitizer = TextSanitizer {
-            _conv_map: HashMap::new(),
+            _oconv_map: None,
             _vrqlangs: Vec::new(),
             _bquiet: bquiet,
             _bdebug: bdebug,
@@ -144,7 +187,7 @@ impl TextSanitizer {
         // Create the TextSanitizer Object
 
         let mut sanitizer = TextSanitizer {
-            _conv_map: HashMap::new(),
+            _oconv_map: None,
             _vrqlangs: Vec::new(),
             _bquiet: bqt,
             _bdebug: bdbg,
@@ -251,13 +294,92 @@ impl TextSanitizer {
         } //if(!options.is_empty())
     }
 
+    /// This method allows to replace the default `ConversionMap` with a custom one.
+    ///
+    /// # Example:
+    ///
+    /// Set a custom `ConversionMap`
+    /// ```
+    ///    use text_sanitizer::{TextSanitizer, ConversionMap, LanguageMap};
+    ///    use std::collections::HashMap;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    ///    let mut lang_map = LanguageMap(HashMap::with_capacity(4));
+    ///
+    ///    lang_map.0.insert("d".to_string(), "".to_string());
+    ///    lang_map.0.insert("1b".to_string(), "".to_string());
+    ///    lang_map.0.insert("80".to_string(), "EUR".to_string());
+    ///    lang_map.0.insert("20ac".to_string(), "EUR".to_string());
+    ///
+    ///    conv_map.0.insert("custom".to_string(), lang_map);
+    ///
+    ///    sanitizer.set_conversion_map(conv_map);
+    ///
+    ///    sanitizer.add_request_language(&"custom");
+    /// ```
+    pub fn set_conversion_map(&mut self, conversion_map: ConversionMap) {
+        self._oconv_map = Some(conversion_map);
+    }
+
+    /// This method allows to add or replace a custom `LanguageMap` within the `ConversionMap`.
+    ///
+    /// # Example:
+    ///
+    /// Add a custom `LanguageMap`
+    /// ```
+    ///    use text_sanitizer::{TextSanitizer, LanguageMap};
+    ///    use std::collections::HashMap;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    let mut lang_map = LanguageMap(HashMap::with_capacity(4));
+    ///
+    ///    lang_map.0.insert("d".to_string(), "".to_string());
+    ///    lang_map.0.insert("1b".to_string(), "".to_string());
+    ///    lang_map.0.insert("80".to_string(), "EUR".to_string());
+    ///    lang_map.0.insert("20ac".to_string(), "EUR".to_string());
+    ///
+    ///    sanitizer.set_language_map(&"custom", lang_map);
+    ///
+    ///    sanitizer.add_request_language(&"custom");
+    /// ```
+    pub fn set_language_map(&mut self, language: &str, language_map: LanguageMap) {
+        if self._oconv_map.is_none() {
+            self._oconv_map = Some(ConversionMap(HashMap::new()));
+        }
+
+        if let Some(map) = &mut self._oconv_map {
+            map.0.insert(language.to_string(), language_map);
+        }
+    }
+
+    /// This method allows to delete a `LanguageMap` from the `ConversionMap`.
+    ///
+    /// # Example:
+    ///
+    /// Remove support for the "es" `LanguageMap`
+    /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.delete_language_map(&"es");
+    /// ```
+    pub fn delete_language_map(&mut self, language: &str) {
+        if let Some(map) = &mut self._oconv_map {
+            map.0.remove(language);
+        }
+    }
+
     /// Adds a Language Shortcode to the Vector of applied Language Replacement Maps.\
     /// In the order in which the Language Shortcode is added is the order in which they
     /// are applied to the Input Data.
     ///
     /// # Parameters:
     ///
-    /// * `slanguage` - language shortcode. Currently only 'en', 'es' and 'de'
+    /// * `language` - language shortcode. By default only 'en', 'es' and 'de'
     /// are recognized.
     ///
     /// # Examples:
@@ -275,8 +397,8 @@ impl TextSanitizer {
     ///
     ///    sanitizer.add_request_language(&"en");
     /// ```
-    pub fn add_request_language(&mut self, slanguage: &str) {
-        let slang = String::from(slanguage);
+    pub fn add_request_language(&mut self, language: &str) {
+        let slang = String::from(language);
 
         if !self._vrqlangs.contains(&slang) {
             self._vrqlangs.push(slang);
@@ -312,43 +434,51 @@ impl TextSanitizer {
 
     #[doc(hidden)]
     fn init(&mut self) {
-        let mut lngrplmap: HashMap<String, String> = HashMap::with_capacity(12);
+        self._oconv_map = Some(ConversionMap(HashMap::with_capacity(3)));
 
-        lngrplmap.insert("d".to_string(), "".to_string());
-        lngrplmap.insert("1b".to_string(), "".to_string());
-        lngrplmap.insert("bb".to_string(), "\"".to_string());
-        lngrplmap.insert("ab".to_string(), "\"".to_string());
-        lngrplmap.insert("80".to_string(), "EUR".to_string());
-        lngrplmap.insert("20ac".to_string(), "EUR".to_string());
-        lngrplmap.insert("25cf".to_string(), "*".to_string());
-        lngrplmap.insert("251c".to_string(), "|-".to_string());
-        lngrplmap.insert("2514".to_string(), "|-".to_string());
-        lngrplmap.insert("2500".to_string(), "-".to_string());
-        lngrplmap.insert("2764".to_string(), "<3".to_string());
-        lngrplmap.insert("1f496".to_string(), "<3".to_string());
+        let mut lngrplmap = LanguageMap(HashMap::with_capacity(12));
 
-        self._conv_map.insert("en".to_string(), lngrplmap);
+        lngrplmap.0.insert("d".to_string(), "".to_string());
+        lngrplmap.0.insert("1b".to_string(), "".to_string());
+        lngrplmap.0.insert("bb".to_string(), "\"".to_string());
+        lngrplmap.0.insert("ab".to_string(), "\"".to_string());
+        lngrplmap.0.insert("80".to_string(), "EUR".to_string());
+        lngrplmap.0.insert("20ac".to_string(), "EUR".to_string());
+        lngrplmap.0.insert("25cf".to_string(), "*".to_string());
+        lngrplmap.0.insert("251c".to_string(), "|-".to_string());
+        lngrplmap.0.insert("2514".to_string(), "|-".to_string());
+        lngrplmap.0.insert("2500".to_string(), "-".to_string());
+        lngrplmap.0.insert("2764".to_string(), "<3".to_string());
+        lngrplmap.0.insert("1f496".to_string(), "<3".to_string());
 
-        let mut lngrplmap: HashMap<String, String> = HashMap::with_capacity(5);
+        if let Some(conv_map) = &mut self._oconv_map {
+            conv_map.0.insert("en".to_string(), lngrplmap);
+        }
 
-        lngrplmap.insert("df".to_string(), "ss".to_string());
-        lngrplmap.insert("dc".to_string(), "Ue".to_string());
-        lngrplmap.insert("e4".to_string(), "ae".to_string());
-        lngrplmap.insert("fc".to_string(), "ue".to_string());
-        lngrplmap.insert("f6".to_string(), "oe".to_string());
+        let mut lngrplmap = LanguageMap(HashMap::with_capacity(5));
 
-        self._conv_map.insert("de".to_string(), lngrplmap);
+        lngrplmap.0.insert("df".to_string(), "ss".to_string());
+        lngrplmap.0.insert("dc".to_string(), "Ue".to_string());
+        lngrplmap.0.insert("e4".to_string(), "ae".to_string());
+        lngrplmap.0.insert("fc".to_string(), "ue".to_string());
+        lngrplmap.0.insert("f6".to_string(), "oe".to_string());
 
-        let mut lngrplmap: HashMap<String, String> = HashMap::with_capacity(6);
+        if let Some(conv_map) = &mut self._oconv_map {
+            conv_map.0.insert("de".to_string(), lngrplmap);
+        }
 
-        lngrplmap.insert("d3".to_string(), "O".to_string());
-        lngrplmap.insert("e1".to_string(), "a".to_string());
-        lngrplmap.insert("e9".to_string(), "e".to_string());
-        lngrplmap.insert("ed".to_string(), "i".to_string());
-        lngrplmap.insert("f1".to_string(), "n".to_string());
-        lngrplmap.insert("f3".to_string(), "o".to_string());
+        let mut lngrplmap = LanguageMap(HashMap::with_capacity(6));
 
-        self._conv_map.insert("es".to_string(), lngrplmap);
+        lngrplmap.0.insert("d3".to_string(), "O".to_string());
+        lngrplmap.0.insert("e1".to_string(), "a".to_string());
+        lngrplmap.0.insert("e9".to_string(), "e".to_string());
+        lngrplmap.0.insert("ed".to_string(), "i".to_string());
+        lngrplmap.0.insert("f1".to_string(), "n".to_string());
+        lngrplmap.0.insert("f3".to_string(), "o".to_string());
+
+        if let Some(conv_map) = &mut self._oconv_map {
+            conv_map.0.insert("es".to_string(), lngrplmap);
+        }
     }
 
     #[doc(hidden)]
@@ -593,187 +723,191 @@ impl TextSanitizer {
             println!("vtext 0:'{:?}'", text);
         }
 
-        let mut srstxt = String::with_capacity(text.len());
-        let mut srptchrs = String::new();
-        let mut orpl = None;
-        let mut ic: usize = 0;
-        let mut icstrt: Option<usize> = None;
-        let mut icend: Option<usize> = None;
+        if let Some(conv_map) = &self._oconv_map {
+            let mut srstxt = String::with_capacity(text.len());
+            let mut srptchrs = String::new();
+            let mut orpl = None;
+            let mut ic: usize = 0;
+            let mut icstrt: Option<usize> = None;
+            let mut icend: Option<usize> = None;
 
-        for uc in text {
-            if (self._bdebug && !self._bquiet) {
-                srptchrs.push_str(&format!("; {} - {}:'{}'", ic, uc, char::from(*uc)));
-            }
+            for uc in text {
+                if (self._bdebug && !self._bquiet) {
+                    srptchrs.push_str(&format!("; {} - {}:'{}'", ic, uc, char::from(*uc)));
+                }
 
-            if (*uc >= 32 as u8 && *uc < 127 as u8) || (*uc == 10 as u8) || (*uc == 9 as u8) {
-                //------------------------
-                //Valid ASCII Character
-
-                //srptchrs.push_str(" - ascii");
-
-                if icstrt.is_some() {
+                if (*uc >= 32 as u8 && *uc < 127 as u8) || (*uc == 10 as u8) || (*uc == 9 as u8) {
                     //------------------------
-                    //Pending Non ASCII Characters
+                    //Valid ASCII Character
 
-                    icend = Some(ic);
+                    //srptchrs.push_str(" - ascii");
 
-                    if (self._bdebug && !self._bquiet) {
-                        println!(
-                            "pdg spec chars '{} - {}': '{:?}'",
-                            icstrt.unwrap(),
-                            icend.unwrap(),
-                            &text[icstrt.unwrap()..icend.unwrap()]
-                        );
-                    }
+                    if icstrt.is_some() {
+                        //------------------------
+                        //Pending Non ASCII Characters
 
-                    //Parse the slice of Non ASCII Characters
-                    let vuni = self.parse_unicode(&text[icstrt.unwrap()..icend.unwrap()]);
+                        icend = Some(ic);
 
-                    if (self._bdebug && !self._bquiet) {
-                        print!("= {:?}", vuni);
-                    }
+                        if (self._bdebug && !self._bquiet) {
+                            println!(
+                                "pdg spec chars '{} - {}': '{:?}'",
+                                icstrt.unwrap(),
+                                icend.unwrap(),
+                                &text[icstrt.unwrap()..icend.unwrap()]
+                            );
+                        }
 
-                    for suni in vuni {
-                        orpl = None;
+                        //Parse the slice of Non ASCII Characters
+                        let vuni = self.parse_unicode(&text[icstrt.unwrap()..icend.unwrap()]);
 
-                        for slng in &self._vrqlangs {
-                            if orpl.is_none() {
-                                olngrplmap = self._conv_map.get(slng.as_str());
+                        if (self._bdebug && !self._bquiet) {
+                            print!("= {:?}", vuni);
+                        }
 
-                                if let Some(lngmap) = olngrplmap {
-                                    orpl = lngmap.get(suni.as_str());
+                        for suni in vuni {
+                            orpl = None;
+
+                            for slng in &self._vrqlangs {
+                                if orpl.is_none() {
+                                    olngrplmap = conv_map.0.get(slng.as_str());
+
+                                    if let Some(lngmap) = olngrplmap {
+                                        orpl = lngmap.0.get(suni.as_str());
+                                    }
+                                } //if orpl.is_none()
+                            } //for slng in vrqlanguages
+
+                            match orpl {
+                                Some(rpl) => {
+                                    srstxt.push_str(rpl);
+
+                                    if (self._bdebug && !self._bquiet) {
+                                        print!(" -> '{}'", rpl);
+                                    }
                                 }
-                            } //if orpl.is_none()
-                        } //for slng in vrqlanguages
+                                None => {
+                                    srstxt.push_str(&format!("(?{})", &suni));
 
-                        match orpl {
-                            Some(rpl) => {
-                                srstxt.push_str(rpl);
+                                    if (self._bdebug && !self._bquiet) {
+                                        print!(" -> '(?{})'", &suni);
+                                    }
+                                } //Some(rpl)
+                            } //match orpl
+                        } //for suni in vuni
 
-                                if (self._bdebug && !self._bquiet) {
-                                    print!(" -> '{}'", rpl);
-                                }
-                            }
-                            None => {
-                                srstxt.push_str(&format!("(?{})", &suni));
+                        if (self._bdebug && !self._bquiet) {
+                            println!("'");
+                        } //if(bdbg && ! bqt)
+                          /**/
 
-                                if (self._bdebug && !self._bquiet) {
-                                    print!(" -> '(?{})'", &suni);
-                                }
-                            } //Some(rpl)
-                        } //match orpl
-                    } //for suni in vuni
+                        icstrt = None;
+                    } //if icstrt.is_some()
 
-                    if (self._bdebug && !self._bquiet) {
-                        println!("'");
-                    } //if(bdbg && ! bqt)
-                      /**/
-
-                    icstrt = None;
-                } //if icstrt.is_some()
-
-                //Add the valid ASCII Character
-                srstxt.push(char::from(*uc));
-            } else {
-                //------------------------
-                //Non ASCII Character
-
-                srptchrs.push_str(&format!(" - non-ascii '{:?}", icstrt));
-
-                if icstrt.is_none() {
-                    icstrt = Some(ic);
-                    //if(bdbg && ! bqt) {
-                    srptchrs.push_str(&format!(" > {:?} - {:?}'|", icstrt, icend));
-                    //}
+                    //Add the valid ASCII Character
+                    srstxt.push(char::from(*uc));
                 } else {
-                    srptchrs.push_str(&format!(" - {:?}'|", icend));
-                } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
-            } //if (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
+                    //------------------------
+                    //Non ASCII Character
 
-            ic += 1;
-        } //for uc in text
+                    srptchrs.push_str(&format!(" - non-ascii '{:?}", icstrt));
 
-        if icstrt.is_some() {
-            icend = Some(ic);
+                    if icstrt.is_none() {
+                        icstrt = Some(ic);
+                        //if(bdbg && ! bqt) {
+                        srptchrs.push_str(&format!(" > {:?} - {:?}'|", icstrt, icend));
+                        //}
+                    } else {
+                        srptchrs.push_str(&format!(" - {:?}'|", icend));
+                    } //if (uc[0] >= 32 as u8 && uc[0] < 127 as u8)
+                } //if (*uc >= 32 as u8 && *uc < 127 as u8) || ( *uc == 10 as u8 )
+
+                ic += 1;
+            } //for uc in text
+
+            if icstrt.is_some() {
+                icend = Some(ic);
+
+                if (self._bdebug && !self._bquiet) {
+                    print!(
+                        "\nrst spec char '{} - {}': '{:?}",
+                        icstrt.unwrap(),
+                        icend.unwrap(),
+                        &text[icstrt.unwrap()..icend.unwrap()]
+                    );
+                }
+
+                let vuni = self.parse_unicode(&text[icstrt.unwrap()..icend.unwrap()]);
+
+                if (self._bdebug && !self._bquiet) {
+                    print!(" | {:?}", vuni);
+                }
+
+                for suni in vuni {
+                    orpl = None;
+
+                    for slng in &self._vrqlangs {
+                        if orpl.is_none() {
+                            olngrplmap = conv_map.0.get(slng.as_str());
+
+                            if let Some(lngmap) = olngrplmap {
+                                orpl = lngmap.0.get(suni.as_str());
+                            }
+                        } //if orpl.is_none()
+                    } //for slng in vrqlanguages
+
+                    match orpl {
+                        Some(rpl) => {
+                            srstxt.push_str(rpl);
+
+                            if (self._bdebug && !self._bquiet) {
+                                print!(" -> '{}'", rpl);
+                            }
+                        }
+                        None => {
+                            srstxt.push_str(&format!("(?{})", &suni));
+
+                            if (self._bdebug && !self._bquiet) {
+                                print!(" -> '(?{})'", &suni);
+                            }
+                        } //Some(rpl)
+                    } //match orpl
+                } //for suni in vuni
+
+                if (self._bdebug && !self._bquiet) {
+                    print!("'");
+                } //if(bdbg && ! bqt)
+
+                icstrt = None;
+            } //if icstrt.is_some()
 
             if (self._bdebug && !self._bquiet) {
-                print!(
-                    "\nrst spec char '{} - {}': '{:?}",
-                    icstrt.unwrap(),
-                    icend.unwrap(),
-                    &text[icstrt.unwrap()..icend.unwrap()]
-                );
-            }
+                srptchrs.push_str(&format!("; chr cnt '{}'", ic));
 
-            let vuni = self.parse_unicode(&text[icstrt.unwrap()..icend.unwrap()]);
+                println!("; sanitze done.");
+                println!("chrs rpt: '{:?}'", &srptchrs);
 
-            if (self._bdebug && !self._bquiet) {
-                print!(" | {:?}", vuni);
-            }
+                let vsttrpt: Vec<char> = String::from_utf8_lossy(text).to_mut().chars().collect();
 
-            for suni in vuni {
-                orpl = None;
+                println!("stt rpt chrs (count : '{}'):\n{:?}", vsttrpt.len(), vsttrpt);
 
-                for slng in &self._vrqlangs {
-                    if orpl.is_none() {
-                        olngrplmap = self._conv_map.get(slng.as_str());
+                println!("stt chrs ascii:");
 
-                        if let Some(lngmap) = olngrplmap {
-                            orpl = lngmap.get(suni.as_str());
-                        }
-                    } //if orpl.is_none()
-                } //for slng in vrqlanguages
-
-                match orpl {
-                    Some(rpl) => {
-                        srstxt.push_str(rpl);
-
-                        if (self._bdebug && !self._bquiet) {
-                            print!(" -> '{}'", rpl);
-                        }
+                for c in &vsttrpt {
+                    if !c.is_ascii() {
+                        print!("{}|", c.escape_unicode().to_string());
+                    } else {
+                        print!("{}|", c);
                     }
-                    None => {
-                        srstxt.push_str(&format!("(?{})", &suni));
+                } //for c in &vsttrpt
 
-                        if (self._bdebug && !self._bquiet) {
-                            print!(" -> '(?{})'", &suni);
-                        }
-                    } //Some(rpl)
-                } //match orpl
-            } //for suni in vuni
-
-            if (self._bdebug && !self._bquiet) {
-                print!("'");
+                println!();
             } //if(bdbg && ! bqt)
 
-            icstrt = None;
-        } //if icstrt.is_some()
-
-        if (self._bdebug && !self._bquiet) {
-            srptchrs.push_str(&format!("; chr cnt '{}'", ic));
-
-            println!("; sanitze done.");
-            println!("chrs rpt: '{:?}'", &srptchrs);
-
-            let vsttrpt: Vec<char> = String::from_utf8_lossy(text).to_mut().chars().collect();
-
-            println!("stt rpt chrs (count : '{}'):\n{:?}", vsttrpt.len(), vsttrpt);
-
-            println!("stt chrs ascii:");
-
-            for c in &vsttrpt {
-                if !c.is_ascii() {
-                    print!("{}|", c.escape_unicode().to_string());
-                } else {
-                    print!("{}|", c);
-                }
-            } //for c in &vsttrpt
-
-            println!();
-        } //if(bdbg && ! bqt)
-
-        //Return the sanitized String
-        srstxt
+            //Return the sanitized String
+            srstxt
+        } else {
+            String::from_utf8_lossy(text).into_owned()
+        }
     }
 
     /// Creates from a given string slice a simplified version with ASCII characters.
@@ -955,8 +1089,7 @@ fn proc_sparkle_heart_string() {
 
     let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    let srsout = sanitize_string(str::from_utf8(&vsparkle_heart).unwrap()
-      , &vrqlngs, &"-d");
+    let srsout = sanitize_string(str::from_utf8(&vsparkle_heart).unwrap(), &vrqlngs, &"-d");
 
     println!("sparkle_heart: '{}'", srsout);
 
@@ -997,6 +1130,122 @@ fn sanitizer_sparkle_heart_string() {
     println!("sparkle_heart: '{}'", srsout);
 
     assert_eq!(srsout, "<3");
+}
+
+/// Instantiating the `TextSanitizer` with a different `ConversionMap` causes that the german
+/// umlaut " _ü_ " is not recognized anymore. Bytes are shown as byte sequence.
+
+#[test]
+fn sanitizer_new_conversion_map() {
+    let finnish_data = "Minä tahdon kernaasti puhua suomen kielen, [mutta] en minä taida.";
+    let german_data = "Deutsch verwendet ähnliche Umlaute, wird aber anders übersetzt.";
+    let finnish_res = "Mina tahdon kernaasti puhua suomen kielen, [mutta] en mina taida.";
+    let german_res = "Deutsch verwendet ahnliche Umlaute, wird aber anders (?fc)bersetzt.";
+
+
+    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    let mut lang_map = LanguageMap(HashMap::with_capacity(1));
+
+    lang_map.0.insert("e4".to_string(), "a".to_string());
+
+    conv_map.0.insert("fi".to_string(), lang_map);
+
+    let mut sanitizer = TextSanitizer::new_with_conversion_map(conv_map);
+
+    sanitizer.add_request_language(&"fi");
+
+    let sanitized = sanitizer.sanitize_string(finnish_data);
+
+    println!("finnish result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), finnish_res);
+
+    let sanitized = sanitizer.sanitize_string(german_data);
+
+    println!("german result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), german_res);
+}
+
+#[test]
+fn sanitizer_set_conversion_map() {
+    let finnish_data = "Minä tahdon kernaasti puhua suomen kielen, [mutta] en minä taida.";
+    let german_data = "Deutsch verwendet ähnliche Umlaute, wird aber anders übersetzt.";
+    let finnish_res = "Mina tahdon kernaasti puhua suomen kielen, [mutta] en mina taida.";
+    let german_res = "Deutsch verwendet aehnliche Umlaute, wird aber anders uebersetzt.";
+
+    let mut sanitizer = TextSanitizer::new();
+
+    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    let mut lang_map = LanguageMap(HashMap::with_capacity(1));
+
+    lang_map.0.insert("e4".to_string(), "a".to_string());
+
+    conv_map.0.insert("fi".to_string(), lang_map);
+
+    let mut lang_map = LanguageMap(HashMap::with_capacity(2));
+
+    lang_map.0.insert("e4".to_string(), "ae".to_string());
+    lang_map.0.insert("fc".to_string(), "ue".to_string());
+
+    conv_map.0.insert("de".to_string(), lang_map);
+
+    sanitizer.set_conversion_map(conv_map);
+
+    sanitizer.add_request_language(&"fi");
+    sanitizer.add_request_language(&"de");
+
+    let sanitized = sanitizer.sanitize_string(finnish_data);
+
+    println!("finnish result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), finnish_res);
+
+    sanitizer.clear_request_languages();
+
+    sanitizer.add_request_language(&"de");
+    sanitizer.add_request_language(&"fi");
+
+    let sanitized = sanitizer.sanitize_string(german_data);
+
+    println!("german result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), german_res);
+}
+
+#[test]
+fn sanitizer_language_map() {
+    let finnish_data = "Minä tahdon kernaasti puhua suomen kielen, [mutta] en minä taida.";
+    let german_data = "Deutsch verwendet ähnliche Umlaute, wird aber anders übersetzt.";
+    let finnish_res = "Mina tahdon kernaasti puhua suomen kielen, [mutta] en mina taida.";
+    let german_res = "Deutsch verwendet aehnliche Umlaute, wird aber anders uebersetzt.";
+
+    let mut sanitizer = TextSanitizer::new();
+
+    let mut lang_map = LanguageMap(HashMap::with_capacity(1));
+
+    lang_map.0.insert("e4".to_string(), "a".to_string());
+
+    sanitizer.set_language_map(&"fi", lang_map);
+
+    sanitizer.add_request_language(&"fi");
+
+    let sanitized = sanitizer.sanitize_string(finnish_data);
+
+    println!("finnish result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), finnish_res);
+
+    sanitizer.clear_request_languages();
+
+    sanitizer.add_request_language(&"de");
+    sanitizer.add_request_language(&"fi");
+
+    let sanitized = sanitizer.sanitize_string(german_data);
+
+    println!("german result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), german_res);
 }
 
 #[test]

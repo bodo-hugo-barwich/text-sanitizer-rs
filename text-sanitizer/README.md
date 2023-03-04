@@ -8,7 +8,7 @@ _Rust_ Crate to convert raw text bytes into valid `std::str::String` with plain 
 * Very low Dependencies\
   This leads to:
   * High Compability (compiles even with old _Rust_ Compilers)
-  * Very fast Startup Time (Execution Time about **3 - 5 ms**)
+  * Very fast Startup Time (Execution Time less than **3 ms** on a 27KB document)
 * Robust Code (does not use risky `unwrap()` Methods)\
   Developed with the _DevOps_ Mentalitity: "_can fail but will live to tell_"
 

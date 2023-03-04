@@ -26,4 +26,4 @@
 
 pub mod sanitizer;
 
-pub use sanitizer::TextSanitizer;
+pub use sanitizer::{ConversionMap, LanguageMap, TextSanitizer};
