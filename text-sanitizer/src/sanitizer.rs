@@ -20,10 +20,10 @@ use std::str;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ConversionMap(HashMap<String, LanguageMap>);
+pub struct ConversionMap(pub HashMap<String, LanguageMap>);
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct LanguageMap(HashMap<String, String>);
+pub struct LanguageMap(pub HashMap<String, String>);
 
 //==============================================================================
 // Structure TextSanitizer Declaration
@@ -93,6 +93,7 @@ impl TextSanitizer {
     /// Create a `TextSanitizer` object with custom `ConversionMap`
     /// ```
     ///    use text_sanitizer::{TextSanitizer, ConversionMap, LanguageMap};
+    ///    use std::collections::HashMap;
     ///
     ///    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
     ///    let mut lang_map = LanguageMap(HashMap::with_capacity(4));
@@ -300,6 +301,7 @@ impl TextSanitizer {
     /// Set a custom `ConversionMap`
     /// ```
     ///    use text_sanitizer::{TextSanitizer, ConversionMap, LanguageMap};
+    ///    use std::collections::HashMap;
     ///
     ///    let mut sanitizer = TextSanitizer::new();
     ///
@@ -321,13 +323,14 @@ impl TextSanitizer {
         self._oconv_map = Some(conversion_map);
     }
 
-    /// This method allows to add a custom `LanguageMap` to the default `ConversionMap`.
+    /// This method allows to add or replace a custom `LanguageMap` within the `ConversionMap`.
     ///
     /// # Example:
     ///
     /// Add a custom `LanguageMap`
     /// ```
     ///    use text_sanitizer::{TextSanitizer, LanguageMap};
+    ///    use std::collections::HashMap;
     ///
     ///    let mut sanitizer = TextSanitizer::new();
     ///
@@ -338,8 +341,6 @@ impl TextSanitizer {
     ///    lang_map.0.insert("80".to_string(), "EUR".to_string());
     ///    lang_map.0.insert("20ac".to_string(), "EUR".to_string());
     ///
-    ///    conv_map.0.insert("custom".to_string(), lang_map);
-    ///
     ///    sanitizer.set_language_map(&"custom", lang_map);
     ///
     ///    sanitizer.add_request_language(&"custom");
@@ -349,8 +350,26 @@ impl TextSanitizer {
             self._oconv_map = Some(ConversionMap(HashMap::new()));
         }
 
-        if let Some(map) = self._oconv_map {
+        if let Some(map) = &mut self._oconv_map {
             map.0.insert(language.to_string(), language_map);
+        }
+    }
+
+    /// This method allows to delete a `LanguageMap` from the `ConversionMap`.
+    ///
+    /// # Example:
+    ///
+    /// Remove support for the "es" `LanguageMap`
+    /// ```
+    ///    use text_sanitizer::TextSanitizer;
+    ///
+    ///    let mut sanitizer = TextSanitizer::new();
+    ///
+    ///    sanitizer.delete_language_map(&"es");
+    /// ```
+    pub fn delete_language_map(&mut self, language: &str) {
+        if let Some(map) = &mut self._oconv_map {
+            map.0.remove(language);
         }
     }
 
@@ -432,7 +451,7 @@ impl TextSanitizer {
         lngrplmap.0.insert("2764".to_string(), "<3".to_string());
         lngrplmap.0.insert("1f496".to_string(), "<3".to_string());
 
-        if let Some(conv_map) = self._oconv_map {
+        if let Some(conv_map) = &mut self._oconv_map {
             conv_map.0.insert("en".to_string(), lngrplmap);
         }
 
@@ -444,7 +463,7 @@ impl TextSanitizer {
         lngrplmap.0.insert("fc".to_string(), "ue".to_string());
         lngrplmap.0.insert("f6".to_string(), "oe".to_string());
 
-        if let Some(conv_map) = self._oconv_map {
+        if let Some(conv_map) = &mut self._oconv_map {
             conv_map.0.insert("de".to_string(), lngrplmap);
         }
 
@@ -457,10 +476,9 @@ impl TextSanitizer {
         lngrplmap.0.insert("f1".to_string(), "n".to_string());
         lngrplmap.0.insert("f3".to_string(), "o".to_string());
 
-        if let Some(conv_map) = self._oconv_map {
+        if let Some(conv_map) = &mut self._oconv_map {
             conv_map.0.insert("es".to_string(), lngrplmap);
         }
-
     }
 
     #[doc(hidden)]
@@ -705,7 +723,7 @@ impl TextSanitizer {
             println!("vtext 0:'{:?}'", text);
         }
 
-        if let Some(conv_map) = self._oconv_map {
+        if let Some(conv_map) = &self._oconv_map {
             let mut srstxt = String::with_capacity(text.len());
             let mut srptchrs = String::new();
             let mut orpl = None;
@@ -1071,8 +1089,7 @@ fn proc_sparkle_heart_string() {
 
     let vrqlngs: Vec<String> = vec![String::from("en")];
 
-    let srsout = sanitize_string(str::from_utf8(&vsparkle_heart).unwrap()
-      , &vrqlngs, &"-d");
+    let srsout = sanitize_string(str::from_utf8(&vsparkle_heart).unwrap(), &vrqlngs, &"-d");
 
     println!("sparkle_heart: '{}'", srsout);
 
@@ -1113,6 +1130,122 @@ fn sanitizer_sparkle_heart_string() {
     println!("sparkle_heart: '{}'", srsout);
 
     assert_eq!(srsout, "<3");
+}
+
+/// Instantiating the `TextSanitizer` with a different `ConversionMap` causes that the german
+/// umlaut " _ü_ " is not recognized anymore. Bytes are shown as byte sequence.
+
+#[test]
+fn sanitizer_new_conversion_map() {
+    let finnish_data = "Minä tahdon kernaasti puhua suomen kielen, [mutta] en minä taida.";
+    let german_data = "Deutsch verwendet ähnliche Umlaute, wird aber anders übersetzt.";
+    let finnish_res = "Mina tahdon kernaasti puhua suomen kielen, [mutta] en mina taida.";
+    let german_res = "Deutsch verwendet ahnliche Umlaute, wird aber anders (?fc)bersetzt.";
+
+
+    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    let mut lang_map = LanguageMap(HashMap::with_capacity(1));
+
+    lang_map.0.insert("e4".to_string(), "a".to_string());
+
+    conv_map.0.insert("fi".to_string(), lang_map);
+
+    let mut sanitizer = TextSanitizer::new_with_conversion_map(conv_map);
+
+    sanitizer.add_request_language(&"fi");
+
+    let sanitized = sanitizer.sanitize_string(finnish_data);
+
+    println!("finnish result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), finnish_res);
+
+    let sanitized = sanitizer.sanitize_string(german_data);
+
+    println!("german result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), german_res);
+}
+
+#[test]
+fn sanitizer_set_conversion_map() {
+    let finnish_data = "Minä tahdon kernaasti puhua suomen kielen, [mutta] en minä taida.";
+    let german_data = "Deutsch verwendet ähnliche Umlaute, wird aber anders übersetzt.";
+    let finnish_res = "Mina tahdon kernaasti puhua suomen kielen, [mutta] en mina taida.";
+    let german_res = "Deutsch verwendet aehnliche Umlaute, wird aber anders uebersetzt.";
+
+    let mut sanitizer = TextSanitizer::new();
+
+    let mut conv_map = ConversionMap(HashMap::with_capacity(2));
+    let mut lang_map = LanguageMap(HashMap::with_capacity(1));
+
+    lang_map.0.insert("e4".to_string(), "a".to_string());
+
+    conv_map.0.insert("fi".to_string(), lang_map);
+
+    let mut lang_map = LanguageMap(HashMap::with_capacity(2));
+
+    lang_map.0.insert("e4".to_string(), "ae".to_string());
+    lang_map.0.insert("fc".to_string(), "ue".to_string());
+
+    conv_map.0.insert("de".to_string(), lang_map);
+
+    sanitizer.set_conversion_map(conv_map);
+
+    sanitizer.add_request_language(&"fi");
+    sanitizer.add_request_language(&"de");
+
+    let sanitized = sanitizer.sanitize_string(finnish_data);
+
+    println!("finnish result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), finnish_res);
+
+    sanitizer.clear_request_languages();
+
+    sanitizer.add_request_language(&"de");
+    sanitizer.add_request_language(&"fi");
+
+    let sanitized = sanitizer.sanitize_string(german_data);
+
+    println!("german result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), german_res);
+}
+
+#[test]
+fn sanitizer_language_map() {
+    let finnish_data = "Minä tahdon kernaasti puhua suomen kielen, [mutta] en minä taida.";
+    let german_data = "Deutsch verwendet ähnliche Umlaute, wird aber anders übersetzt.";
+    let finnish_res = "Mina tahdon kernaasti puhua suomen kielen, [mutta] en mina taida.";
+    let german_res = "Deutsch verwendet aehnliche Umlaute, wird aber anders uebersetzt.";
+
+    let mut sanitizer = TextSanitizer::new();
+
+    let mut lang_map = LanguageMap(HashMap::with_capacity(1));
+
+    lang_map.0.insert("e4".to_string(), "a".to_string());
+
+    sanitizer.set_language_map(&"fi", lang_map);
+
+    sanitizer.add_request_language(&"fi");
+
+    let sanitized = sanitizer.sanitize_string(finnish_data);
+
+    println!("finnish result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), finnish_res);
+
+    sanitizer.clear_request_languages();
+
+    sanitizer.add_request_language(&"de");
+    sanitizer.add_request_language(&"fi");
+
+    let sanitized = sanitizer.sanitize_string(german_data);
+
+    println!("german result: '{}'", sanitized);
+
+    assert_eq!(sanitized.as_str(), german_res);
 }
 
 #[test]
