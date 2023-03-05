@@ -1,0 +1,59 @@
+name: Testing on Debian Buster
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+     branches: [ master ]  
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Label of the container job
+  debian-testing:
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-20.04
+    # Docker Hub image that `debian-testing` executes in
+    container: debian:buster
+
+    steps:
+      # List all installed Rust Libraries
+      - name: List all installed Rust Libraries
+        run: dpkg --get-selections | grep -i rust | wc -l && dpkg --get-selections | grep -i rust | sort
+        
+      # List all installed Rust Libraries
+      - name: List available Rust Libraries
+        run: |
+          cat /etc/apt/sources.list && apt-get update && apt-cache search rust | sort
+          echo "Library 'serde' Version:"
+          apt-cache show librust-serde-dev librust-serde+derive-dev
+
+#          mkdir ../rust_download && cd ../rust_download
+#          apt-get -y install wget
+#          wget http://ftp.debian.org/debian/pool/main/r/rustc/libstd-rust-1.48_1.48.0+dfsg1-2_amd64.deb
+#          wget http://ftp.debian.org/debian/pool/main/r/rustc/libstd-rust-dev_1.48.0+dfsg1-2_amd64.deb
+#          wget http://ftp.debian.org/debian/pool/main/r/rustc/rustc_1.48.0+dfsg1-2_amd64.deb
+#          wget http://ftp.debian.org/debian/pool/main/c/cargo/cargo_0.47.0-3+b1_amd64.deb
+#          dpkg -i libstd-rust-1.48_1.48.0+dfsg1-2_amd64.deb libstd-rust-dev_1.48.0+dfsg1-2_amd64.deb libstd-rust-dev_1.48.0+dfsg1-2_amd64.deb
+#          dpkg -i cargo_0.47.0-3+b1_amd64.deb
+      # Install Rust Libraries
+      - name: Install dependencies
+        run: |
+          apt-get -y install rustc rust-src rust-gdb cargo libstd-rust-dev libstd-rust-1.41
+        
+      # Show Environment and Compiler Version
+      - name: Show Environment and Compiler Version
+        run: | 
+          echo "Operating System:" && cat /etc/os-release
+          echo "Rust Compiler Version:" && rustc --version
+        
+      # Downloads a copy of the code in your repository before running CI tests
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+

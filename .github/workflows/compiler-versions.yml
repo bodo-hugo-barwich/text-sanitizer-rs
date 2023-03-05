@@ -1,0 +1,85 @@
+name: Testing against Compiler Versions
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+     branches: [ master ]  
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  compiler-version-testing:
+
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        # 1.48.0, 1.50.0, 1.52.0, 
+        rust-version: [ 1.41.0, 1.48.0, 1.60.0 ]
+
+    steps:
+    # List all installed Rust Libraries
+    - name: List all installed Rust Libraries
+      run: |
+        dpkg --get-selections | grep -i rust | wc -l 
+        dpkg --get-selections | grep -i rust | sort
+        
+    # List all available Rust Libraries
+    - name: List available Rust Libraries
+      run: |
+        cat /etc/apt/sources.list
+        sudo apt-get update 
+        apt-cache search rust | sort
+        
+    # Show Environment and Compiler Version
+    - name: Show Environment and Compiler Version
+      run: | 
+        echo "* Operating System:" && cat /etc/os-release
+        echo "* Rust Compiler Version:" && rustc --version
+        echo "* RustUp Version:" && rustup --version
+        echo "* RustUp Show:" && rustup show
+        echo "* RustUp Toolchains Installed:" && rustup toolchain list
+        echo "* RustUp Components Installed:" && rustup component list --installed
+        echo "* RustUp Components Help:" && rustup component --help
+        
+    # Uninstall previous Rust Version
+    - name: Uninstall Preinstalled Rust Version
+      run: | 
+        echo "* Directory '~/.cargo/bin' Content 0 :"
+        ls -lah ~/.cargo/bin
+        echo "* Uninstalling Rust Compiler:"
+        rustup component remove cargo-x86_64-unknown-linux-gnu
+        rustup component remove clippy-x86_64-unknown-linux-gnu
+        rustup component remove rustfmt-x86_64-unknown-linux-gnu
+        echo "* Directory ~/.cargo/bin' Content 1 :"
+        ls -lah ~/.cargo/bin
+        echo "* Deleting Rust Binaries:"
+        cd ~/.cargo/bin 
+        rm -f cargo cargo-audit cargo-clippy cargo-fmt cargo-miri cargo-outdated clippy-driver
+        rm -f rls rust-gdb rust-lldb rustdoc rustfmt
+        echo "* Directory ~/.cargo/bin' Content 2 :"
+        ls -lah ~/.cargo/bin
+        
+    # Install Rust Version according to Test Matrix
+    - name: Install Rust Version '${{ matrix.rust-version }}'
+      run: | 
+        echo "* Requested Rust Compiler Version:" ${{ matrix.rust-version }}
+        echo "* Unset Rust Compiler Overrides ..."
+        rustup override unset
+        echo "* Override Default Rust Compiler Version ..."
+        rustup override set  ${{ matrix.rust-version }}
+        echo "* Install Rust Compiler requested Version ..."
+        rustup install ${{ matrix.rust-version }}
+        echo "* Rust Compiler Version:" && rustc --version
+        echo "* RustUp Show:" && rustup show
+        
+    # Check out the Project Code
+    - uses: actions/checkout@v2
+
+    # Build the Application and run the Tests
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+
