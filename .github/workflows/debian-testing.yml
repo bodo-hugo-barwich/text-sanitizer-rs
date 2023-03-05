@@ -26,9 +26,6 @@ jobs:
       - name: List available Rust Libraries
         run: cat /etc/apt/sources.list && apt-get update && apt-cache search rust | sort
 
-      # Install Rust Libraries
-      - name: Install dependencies
-        run: |
 #          mkdir ../rust_download && cd ../rust_download
 #          apt-get -y install wget
 #          wget http://ftp.debian.org/debian/pool/main/r/rustc/libstd-rust-1.48_1.48.0+dfsg1-2_amd64.deb
@@ -37,6 +34,9 @@ jobs:
 #          wget http://ftp.debian.org/debian/pool/main/c/cargo/cargo_0.47.0-3+b1_amd64.deb
 #          dpkg -i libstd-rust-1.48_1.48.0+dfsg1-2_amd64.deb libstd-rust-dev_1.48.0+dfsg1-2_amd64.deb libstd-rust-dev_1.48.0+dfsg1-2_amd64.deb
 #          dpkg -i cargo_0.47.0-3+b1_amd64.deb
+      # Install Rust Libraries
+      - name: Install dependencies
+        run: |
           apt-get -y install rustc rust-src rust-gdb cargo libstd-rust-dev libstd-rust-1.41
         
       # Show Environment and Compiler Version
