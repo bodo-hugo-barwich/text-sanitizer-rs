@@ -14,8 +14,8 @@ Precompiled **Binaries** are distributed with the Releases in the Release Sectio
 ## Features
 * Very low Dependencies\
   This leads to:
-  * High Compability (compiles even with old _Rust_ Compilers)
-  * Very fast Startup Time (Execution Time less than **3 ms** on a 27KB document)
+  * High Compatibility (compiles even with old _Rust_ Compilers - tested against Versions `[ 1.41, 1.48, 1.60 ]`)
+  * Very fast Startup Time (Execution Time less than **< 3 ms** on a 27KB document)
 * Robust Code (does not use risky `unwrap()` Methods)\
   Developed with the _DevOps_ Mentalitity: "_can fail but will live to tell_"
 
