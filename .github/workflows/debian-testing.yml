@@ -24,7 +24,10 @@ jobs:
         
       # List all installed Rust Libraries
       - name: List available Rust Libraries
-        run: cat /etc/apt/sources.list && apt-get update && apt-cache search rust | sort
+        run: |
+          cat /etc/apt/sources.list && apt-get update && apt-cache search rust | sort
+          echo "Library 'serde' Version:"
+          apt-cache show librust-serde-dev librust-serde+derive-dev
 
 #          mkdir ../rust_download && cd ../rust_download
 #          apt-get -y install wget
